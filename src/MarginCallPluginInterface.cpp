@@ -23,8 +23,11 @@ extern "C" void CreateReport(Value& request,
     std::vector<TradeRecord> closed_trades;
     int result = 2;
 
+    std::string message = "test";
+    std::string error = "ERROR";
     try {
-        result = server->GetCloseTradesByLogin(2, &closed_trades);
+        // result = server->GetCloseTradesByLogin(2, &closed_trades);
+        result = server->LogsOut(error, message);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
