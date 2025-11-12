@@ -2,38 +2,34 @@
 
 using namespace ast;
 
-extern "C" void AboutReport(Value& request,
-                            Value& response,
-                            Document::AllocatorType& allocator,
+extern "C" void AboutReport(rapidjson::Value& request,
+                            rapidjson::Value& response,
+                            rapidjson::Document::AllocatorType& allocator,
                             CServerInterface* server) {
     response.AddMember("version", 1, allocator);
     response.AddMember("name", Value().SetString("Margin call report", allocator), allocator);
     response.AddMember("description", Value().SetString("Report with table", allocator), allocator);
-    response.AddMember("type", REPORT_NONE_TYPE, allocator);
+    response.AddMember("type", REPORT_GROUP_TYPE, allocator);
 }
 
 extern "C" void DestroyReport() {}
 
-extern "C" void CreateReport(Value& request,
-                             Value& response,
-                             Document::AllocatorType& allocator,
+extern "C" void CreateReport(rapidjson::Value& request,
+                             rapidjson::Value& response,
+                             rapidjson::Document::AllocatorType& allocator,
                              CServerInterface* server) {
     std::cout << "Creating margin call report.." << std::endl;
 
     std::vector<TradeRecord> closed_trades;
     int result = 2;
 
-    std::string message = "test";
-    std::string error = "ERROR";
-    try {
-        // result = server->GetCloseTradesByLogin(2, &closed_trades);
-        result = server->LogsOut(error, message);
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-    }
+    LogJSON("request", request);
 
-    std::cout << "Result: " << std::to_string(result) << std::endl;
-    std::cout << "Closed trades count: " << closed_trades.size() << std::endl;
+    // try {
+    //     result = server->GetCloseTradesByLogin(2, &closed_trades);
+    // } catch (const std::exception& e) {
+    //     std::cerr << e.what() << std::endl;
+    // }
 
     struct DayData {
         std::string day;
@@ -49,18 +45,28 @@ extern "C" void CreateReport(Value& request,
         {"Fri", 160.8, 102.4}
     };
 
-    // ---------- Table ----------
+    // ---------- Таблица ----------
     auto makeTable = [&](const std::vector<DayData>& rows) -> Node {
         std::vector<Node> tableRows;
 
         // Заголовок
         tableRows.push_back(tr({
-            th({ text("Day") }),
-            th({ text("Commission") }),
-            th({ text("P/L") })
+            th({ text("Login") }),
+            th({ text("Name") }),
+            th({ text("Leverage") }),
+            th({ text("Balance") }),
+            th({ text("Credit") }),
+            th({ text("Floating P/L") }),
+            th({ text("Equity") }),
+            th({ text("Margin") }),
+            th({ text("Free Margin") }),
+            th({ text("Margin Limits") }),
+            th({ text("Margin Level") }),
+            th({ text("Add. Margin") }),
+            th({ text("Currency") }),
         }));
 
-        // Динамические строки (через лямбду)
+        // Динамическое формирование строк (через лямбду)
         for (const auto& row : rows) {
             tableRows.push_back(tr({
                 td({ text(row.day) }),
@@ -79,4 +85,11 @@ extern "C" void CreateReport(Value& request,
 
 
     to_json(report, response, allocator);
+}
+
+void LogJSON(const std::string& name, const Value& value) {
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    value.Accept(writer); // сериализуем JSON в строку
+    std::cout << "[LogJSON]: " << name << ": " << buffer.GetString() << std::endl;
 }
