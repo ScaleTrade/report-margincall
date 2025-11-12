@@ -369,15 +369,20 @@ enum {
 };
 
 enum {
-    REPORT_NONE_TYPE,               // report without filter
-    REPORT_RANGE_TYPE,              // report filter with time range
-    REPORT_DAILY_TYPE,              // report filter by one day
-    REPORT_ACCOUNT_TYPE,            // report filter by account
-    REPORT_GROUP_TYPE,              // report filter with group mask
-    REPORT_RANGE_GROUP_TYPE,        // report filter with time range and group mask
-    REPORT_DAILY_GROUP_TYPE,        // report filter one day and group mask
-    REPORT_RANGE_ACCOUNT_TYPE,      // report filter with time range and account
-    REPORT_DAILY_ACCOUNT_TYPE       // report filter by one day and account
+    REPORT_NONE_TYPE,                    //report without filter
+    REPORT_RANGE_TYPE,                   //report filter with time range
+    REPORT_DAILY_TYPE,                   //report filter by one day
+    REPORT_ACCOUNT_TYPE,                 //report filter by account
+    REPORT_SYMBOL_TYPE,                  //report filter by account
+    REPORT_GROUP_TYPE,                   //report filter with group mask
+    REPORT_RANGE_GROUP_TYPE,             //report filter one day and group mask
+    REPORT_DAILY_GROUP_TYPE,             //report filter one day and group mask
+    REPORT_RANGE_ACCOUNT_TYPE,           //report filter with time range and account
+    REPORT_DAILY_ACCOUNT_TYPE,           //report filter by one day and account
+    REPORT_RANGE_SYMBOL_TYPE,            //report filter with time range and account
+    REPORT_DAILY_SYMBOL_TYPE,            //report filter by one day and account
+    REPORT_RANGE_GROUP_SYMBOL_TYPE,      //report filter with time range and group and symbols
+    REPORT_DAILY_GROUP_SYMBOL_TYPE       //report filter by one day and groups and symbols
 };
 
 enum {
@@ -877,78 +882,72 @@ struct CandleRecord {
 };
 
 struct CServerInterface {
-    virtual int TickSet(TickInfo& tick);
-
-    virtual int LogsOut(const std::string& type, const std::string& message);
-
+    virtual int TickSet(TickInfo& tick); //set quotes tick
+    virtual int LogsOut(const std::string& type, const std::string& message);  //send logs to console
     static int GetApiVersion() { return PLUGIN_SERVER_API; }
 
-    virtual int GetAccountsByGroup(const std::string& group, std::vector<AccountRecord> *accounts);
+    //+------------------------------------------------------------------+
+    // Accounts
+    //+------------------------------------------------------------------+
+    virtual int GetAccountsByGroup(const std::string& group, std::vector<AccountRecord>* accounts); //Get acccounts by group
+    virtual int GetAccountByLogin(int login, AccountRecord* account);                               //Get acccount by login
+    virtual int GetAccountBalanceByLogin(int login, MarginLevel* margin);                           //Get acccount by login
+    virtual int AddAccount(const AccountRecord& account);                                           //Add acccount
+    virtual int UpdateAccount(const AccountRecord& account);                                        //Upd acccount
+    virtual int DeleteAccount(int login);                                                           //Del acccount by login
 
-    virtual int GetAccountByLogin(int login, AccountRecord *account);
-
-    virtual int GetAccountBalanceByLogin(int login, MarginLevel *margin);
-
-    virtual int AddAccount(const AccountRecord& account);
-
-    virtual int UpdateAccount(const AccountRecord& account);
-
-    virtual int DeleteAccount(int login);
-
+    //+------------------------------------------------------------------+
+    // Trades
+    //+------------------------------------------------------------------+
     virtual int OpenTrade(const TradeRecord& trade);
-
     virtual int CloseTrade(const TradeRecord& trade);
-
     virtual int UpdateOpenTrade(const TradeRecord& trade);
-
     virtual int UpdateCloseTrade(const TradeRecord& trade);
-
     virtual int CheckOpenTrade(const TradeRecord& trade);
-
     virtual int CheckCloseTrade(const TradeRecord& trade);
+    virtual int GetOpenTradesByLogin(int login, std::vector<TradeRecord>* trades);
+    virtual int GetOpenTradesByMagic(int magic, std::vector<TradeRecord>* trades);
+    virtual int GetOpenTradeByOrder(int order, TradeRecord* trade);
+    virtual int GetCloseTradesByLogin(int login, std::vector<TradeRecord>* trades);
+    virtual int GetAllOpenTrades(std::vector<TradeRecord>* trades);
 
-    virtual int GetOpenTradesByLogin(int login, std::vector<TradeRecord> *trades);
-
-    virtual int GetOpenTradesByMagic(int magic, std::vector<TradeRecord> *trades);
-
-    virtual int GetOpenTradeByOrder(int order, TradeRecord *trade);
-
-    virtual int GetCloseTradesByLogin(int login, std::vector<TradeRecord> *trades);
-
-    virtual int GetAllOpenTrades(std::vector<TradeRecord> *trades);
-
+    //+------------------------------------------------------------------+
+    // Symbols
+    //+------------------------------------------------------------------+
     virtual int GetSymbol(const std::string& symbol, SymbolRecord *cs);
 
-    virtual int GetGroup(const std::string& group_name, GroupRecord *group);
+    //+------------------------------------------------------------------+
+    // Groups
+    //+------------------------------------------------------------------+
+    virtual int GetGroup(const std::string& group_name, GroupRecord* group);
+    virtual int GetAllGroups(std::vector<GroupRecord>* groups);
 
-    virtual int GetAllGroups(std::vector<GroupRecord> *groups);
-
+    //+------------------------------------------------------------------+
+    // System
+    //+------------------------------------------------------------------+
     virtual int CalculateCommission(const TradeRecord& trade, double *calculated_commission);
-
     virtual int CalculateSwap(const TradeRecord& trade, double *calculated_swap);
-
     virtual int CalculateProfit(const TradeRecord& trade, double *calculated_profit);
-
     virtual int CalculateMargin(const TradeRecord& trade, double *calculated_margin);
 
-    virtual int GetCandles(const std::string& symbol, const std::string& frame, time_t from, time_t to,
-                           std::vector<CandleRecord> *candles);
 
+    //+------------------------------------------------------------------+
+    // Chart
+    //+------------------------------------------------------------------+
+    virtual int GetCandles(const std::string& symbol, const std::string& frame, time_t from, time_t to, std::vector<CandleRecord>* candles);
     virtual int SetCandles(const std::string& symbol, const std::vector<CandleRecord>& candles);
-
     virtual int DeleteCandlesAll(const std::string& symbol);
-
     virtual int DeleteCandlesPeriod(const std::string& symbol, time_t from, time_t to);
 
-    virtual int SendToManager(int manager_id, const Value& data);
 
-    virtual int BroadcastToManagers(const Value& data);
-
-    virtual int SendToAccount(int account_id, const Value& data);
-
-    virtual int BroadcastToAccounts(const Value& data);
-
-    virtual int SendState(const Value& data);
+    //+------------------------------------------------------------------+
+    // Stream
+    //+------------------------------------------------------------------+
+    virtual int SendToManager(int manager_id, const Value & data);//send data to some Manager
+    virtual int BroadcastToManagers(const Value & data); //send data to all Managers
+    virtual int SendToAccount(int account_id, const Value & data); //send data to some Account
+    virtual int BroadcastToAccounts(const Value & data); //send data to all Accounts
+    virtual int SendState(const Value & data); //send update data to Plugin State
 };
 
 #endif
