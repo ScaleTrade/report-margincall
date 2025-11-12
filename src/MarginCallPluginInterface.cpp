@@ -18,6 +18,8 @@ extern "C" void CreateReport(Value& request,
                              Value& response,
                              Document::AllocatorType& allocator,
                              CServerInterface* server) {
+    std::cout << "Creating margin call report.." << std::endl;
+
     std::vector<TradeRecord> closed_trades;
     int result = 2;
 
