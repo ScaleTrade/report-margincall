@@ -18,6 +18,12 @@ extern "C" void CreateReport(Value& request,
                              Value& response,
                              Document::AllocatorType& allocator,
                              CServerInterface* server) {
+
+    std::cout << "Creating report..." << std::endl;
+
+    const int api_version = server->GetApiVersion();
+    const std::string test_string = "API VERSION: " + std::to_string(api_version);
+
     struct DayData {
         std::string day;
         double commission;
@@ -56,10 +62,12 @@ extern "C" void CreateReport(Value& request,
     };
 
     Node report = div({
-        h1({ text("Margin Call Report") }),
+        h1({ text(test_string) }),
         makeTable(data)
     }, props({{"className", "report"}}));
 
 
     to_json(report, response, allocator);
+
+    std::cout << "Creating report..." << std::endl;
 }
