@@ -68,7 +68,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                     server->CalculateCommission(trade, &trade_commission);
                     server->CalculateMargin(trade, &trade_margin);
 
-                    pl += trade_profit + trade_swap + +trade_commission;
+                    pl += trade_profit + trade_swap + trade_commission;
                     margin += trade_margin;
                 }
             }
