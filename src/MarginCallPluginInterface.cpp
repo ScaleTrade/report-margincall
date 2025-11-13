@@ -32,6 +32,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << e.what() << std::endl;
     }
 
+    std::cout << "Result: " <<  result << std::endl;
+    std::cout << "Accounts size: " <<  accounts.size() << std::endl;
+
+
     struct DayData {
         std::string day;
         double commission;
