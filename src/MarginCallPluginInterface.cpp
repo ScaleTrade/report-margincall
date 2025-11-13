@@ -50,7 +50,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
         // Формирование строк
         for (const auto& account :accounts_vector) {
-            double pl = 0.0;
+            double floating_pl = 0.0;
             double margin = 0.0;
 
             // Открытые сделки аккаунта
@@ -68,12 +68,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
                     server->CalculateCommission(trade, &trade_commission);
                     server->CalculateMargin(trade, &trade_margin);
 
-                    pl += trade_profit + trade_swap + trade_commission;
+                    floating_pl += trade_profit + trade_swap + trade_commission;
                     margin += trade_margin;
                 }
             }
 
-            const double equity = account.balance + account.credit + margin;
+            const double equity = account.balance + account.credit + floating_pl;
             const double free_margin = equity - margin;
             const double margin_level = margin > 0.0 ? (equity / margin) * 100.0 : 0.0;
 
@@ -83,7 +83,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
             std::cout << "Leverage: " << account.leverage << std::endl;
             std::cout << "Balance: " << account.balance << std::endl;
             std::cout << "Credit: " << account.credit << std::endl;
-            std::cout << "Floating P/L: " << pl << std::endl;
+            std::cout << "Floating P/L: " << floating_pl << std::endl;
             std::cout << "Equity: " << equity << std::endl;
             std::cout << "Margin: " << margin << std::endl;
             std::cout << "Free Margin: " << free_margin << std::endl;
@@ -95,15 +95,13 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 td({ text(std::to_string(account.leverage)) }),
                 td({ text(std::to_string(account.balance)) }),
                 td({ text(std::to_string(account.credit)) }),
-                td({ text(std::to_string(pl)) }),
+                td({ text(std::to_string(floating_pl)) }),
                 td({ text(std::to_string(equity)) }),
                 td({ text(std::to_string(margin)) }),
                 td({ text(std::to_string(free_margin)) }),
                 td({ text(std::to_string(margin_level)) }),
             }));
         }
-
-
 
         return table(table_rows, props({{"className", "data-table"}}));
     };
