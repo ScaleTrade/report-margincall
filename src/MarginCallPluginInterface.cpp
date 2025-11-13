@@ -88,7 +88,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
             std::cout << "Margin: " << margin << std::endl;
             std::cout << "Free Margin: " << free_margin << std::endl;
             std::cout << "Margin Level: " << margin_level << std::endl;
-            std::cout << "=================" << std::endl;
 
             table_rows.push_back(tr({
                 td({ text(std::to_string(account.login)) }),
