@@ -29,15 +29,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
     std::vector<AccountRecord> accounts_vector;
     std::vector<TradeRecord> trades_vector;
 
-    if (group_mask == "*") {
-        const int groups_result = server->GetAllGroups(&groups_vector);
+    server->GetAccountsByGroup(group_mask, &accounts_vector);
 
-        for (const GroupRecord& group : groups_vector) {
-            server->GetAccountsByGroup(group.group, &accounts_vector);
-        }
-    } else {
-        server->GetAccountsByGroup(group_mask, &accounts_vector);
-    }
+    // if (group_mask == "*") {
+    //     const int groups_result = server->GetAllGroups(&groups_vector);
+    //
+    //     for (const GroupRecord& group : groups_vector) {
+    //         server->GetAccountsByGroup(group.group, &accounts_vector);
+    //     }
+    // } else {
+    //     server->GetAccountsByGroup(group_mask, &accounts_vector);
+    // }
 
     std::cout << "Groups vector size: " << groups_vector.size()<< std::endl;
     std::cout << "Accounts vector size: " << accounts_vector.size()<< std::endl;
