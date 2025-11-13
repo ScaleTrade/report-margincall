@@ -58,6 +58,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
             th({ text("Add. Margin") }),
             th({ text("Currency") }),
         }));
+
+        return table(table_rows, props({{"className", "data-table"}}));
     };
 
     std::cout << "Groups vector size: " << groups_vector.size()<< std::endl;
@@ -74,6 +76,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
 void LogJSON(const std::string& name, const Value& value) {
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
-    value.Accept(writer); // сериализуем JSON в строку
+    value.Accept(writer);
     std::cout << "[LogJSON]: " << name << ": " << buffer.GetString() << std::endl;
 }
