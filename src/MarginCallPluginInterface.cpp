@@ -18,6 +18,19 @@ extern "C" void CreateReport(rapidjson::Value& request,
                              rapidjson::Value& response,
                              rapidjson::Document::AllocatorType& allocator,
                              CServerInterface* server) {
+    // Структура накопления итогов
+    struct Total {
+        std::string currency;
+        double balance = 0.0;
+        double credit = 0.0;
+        double floating_pl = 0.0;
+        double equity = 0.0;
+        double margin = 0.0;
+        double margin_free = 0.0;
+    };
+
+    std::unordered_map<std::string, Total> totals_map;
+
     std::string group_mask;
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
@@ -36,7 +49,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 return group.currency;
             }
         }
-        return "N/A"; // если вдруг группа не найдена
+        return "N/A"; // группа не найдена - валюта не определена
     };
 
     // Таблица
@@ -73,6 +86,19 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 floating_pl = margin_level_struct.equity - margin_level_struct.balance;
                 std::string currency = get_group_currency(account.group);
 
+                auto& total = totals_map[currency];
+
+                // Заполняем валюту (один раз)
+                total.currency = currency;
+
+                // Калькуляция
+                total.balance     += margin_level_struct.balance;
+                total.credit      += margin_level_struct.credit;
+                total.floating_pl += floating_pl;
+                total.equity      += margin_level_struct.equity;
+                total.margin      += margin_level_struct.margin;
+                total.margin_free += margin_level_struct.margin_free;
+
                 std::cout << "=================" << std::endl;
                 std::cout << "Login: " << account.login << std::endl;
                 std::cout << "Name: " << account.name << std::endl;
@@ -101,6 +127,40 @@ extern "C" void CreateReport(rapidjson::Value& request,
                     td({ text(currency) }),
                 }));
             }
+        }
+
+        // Формирование строк Total
+        for (const auto& pair : totals_map) {
+            const Total& total = pair.second;
+
+            table_rows.push_back(tr({
+                td({ text("TOTAL") }),
+                td({ text("") }),
+                td({ text("") }),
+                td({ text(std::to_string(total.balance)) }),
+                td({ text(std::to_string(total.credit)) }),
+                td({ text(std::to_string(total.floating_pl)) }),
+                td({ text(std::to_string(total.equity)) }),
+                td({ text(std::to_string(total.margin)) }),
+                td({ text(std::to_string(total.margin_free)) }),
+                td({ text("") }),
+                td({ text("") }),
+                td({ text(total.currency) }),
+            }));
+        }
+
+        std::cout << "Total: " << std::endl;
+        for (const auto& pair : totals_map) {
+            const Total& total = pair.second;
+
+            std::cout << "Currency: "     << total.currency      << std::endl;
+            std::cout << "  Balance: "    << total.balance       << std::endl;
+            std::cout << "  Credit: "     << total.credit        << std::endl;
+            std::cout << "  Floating P/L: " << total.floating_pl << std::endl;
+            std::cout << "  Equity: "     << total.equity        << std::endl;
+            std::cout << "  Margin: "     << total.margin        << std::endl;
+            std::cout << "  Free Margin: "<< total.margin_free   << std::endl;
+            std::cout << "=================" << std::endl;
         }
 
         return table(table_rows, props({{"className", "data-table"}}));
