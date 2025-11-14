@@ -10,7 +10,11 @@ extern "C" void AboutReport(rapidjson::Value& request,
                             CServerInterface* server) {
     response.AddMember("version", 1, allocator);
     response.AddMember("name", Value().SetString("Margin call report", allocator), allocator);
-    response.AddMember("description", Value().SetString("Report with table", allocator), allocator);
+    response.AddMember(
+        "description",
+        Value().SetString("Lists accounts currently under margin call or stop out. "
+                          "Includes financial details such as balance, equity, margin, and full account details.",
+                          allocator), allocator);
     response.AddMember("type", REPORT_GROUP_TYPE, allocator);
 }
 
