@@ -7,7 +7,6 @@
 #include <chrono>
 #include <atomic>
 #include <string>
-#include <cmath>
 #include "Structures.hpp"
 #include "ast/ast.hpp"
 

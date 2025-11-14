@@ -1,5 +1,7 @@
 #include "MarginCallPluginInterface.hpp"
 
+#include <iomanip>
+
 using namespace ast;
 
 extern "C" void AboutReport(rapidjson::Value& request,
@@ -52,9 +54,11 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return "N/A"; // группа не найдена - валюта не определена
     };
 
-    // Лямбда для округления до 2х знаков
-    auto round_to_two_digits = [](double value) -> double{
-        return std::round(value * 100.0) / 100.0;
+    // Лямбда подготавливающаяя значения double для вставки в AST (округление до 2х знаков)
+    auto format_for_AST = [](double value) -> std::string {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(2) << value;
+        return oss.str();
     };
 
     // Таблица
@@ -94,39 +98,39 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 auto& total = totals_map[currency];
 
                 total.currency = currency;
-                total.balance     += margin_level_struct.balance;
-                total.credit      += margin_level_struct.credit;
+                total.balance += margin_level_struct.balance;
+                total.credit += margin_level_struct.credit;
                 total.floating_pl += floating_pl;
-                total.equity      += margin_level_struct.equity;
-                total.margin      += margin_level_struct.margin;
+                total.equity += margin_level_struct.equity;
+                total.margin += margin_level_struct.margin;
                 total.margin_free += margin_level_struct.margin_free;
 
                 std::cout << "=================" << std::endl;
                 std::cout << "Login: " << account.login << std::endl;
                 std::cout << "Name: " << account.name << std::endl;
-                std::cout << "Leverage: " << round_to_two_digits(margin_level_struct.leverage) << std::endl;
-                std::cout << "Balance: " << round_to_two_digits(margin_level_struct.balance) << std::endl;
-                std::cout << "Credit: " << round_to_two_digits(margin_level_struct.credit) << std::endl;
-                std::cout << "Floating P/L: " << round_to_two_digits(floating_pl) << std::endl;
-                std::cout << "Equity: " << round_to_two_digits(margin_level_struct.equity) << std::endl;
-                std::cout << "Margin: " << round_to_two_digits(margin_level_struct.margin) << std::endl;
-                std::cout << "Free Margin: " << round_to_two_digits(margin_level_struct.margin_free) << std::endl;
-                std::cout << "Margin Level: " << round_to_two_digits(margin_level_struct.margin_level) << std::endl;
+                std::cout << "Leverage: " << format_for_AST(margin_level_struct.leverage) << std::endl;
+                std::cout << "Balance: " << format_for_AST(margin_level_struct.balance) << std::endl;
+                std::cout << "Credit: " << format_for_AST(margin_level_struct.credit) << std::endl;
+                std::cout << "Floating P/L: " << format_for_AST(floating_pl) << std::endl;
+                std::cout << "Equity: " << format_for_AST(margin_level_struct.equity) << std::endl;
+                std::cout << "Margin: " << format_for_AST(margin_level_struct.margin) << std::endl;
+                std::cout << "Free Margin: " << format_for_AST(margin_level_struct.margin_free) << std::endl;
+                std::cout << "Margin Level: " << format_for_AST(margin_level_struct.margin_level) << std::endl;
                 std::cout << "Currency: " << currency << std::endl;
                 std::cout << "=================" << std::endl;
 
                 table_rows.push_back(tr({
-                    td({ text(std::to_string(account.login)) }),
-                    td({ text(account.name) }),
-                    td({ text(std::to_string(margin_level_struct.leverage)) }),
-                    td({ text(std::to_string(margin_level_struct.balance)) }),
-                    td({ text(std::to_string(margin_level_struct.credit)) }),
-                    td({ text(std::to_string(floating_pl)) }),
-                    td({ text(std::to_string(margin_level_struct.equity)) }),
-                    td({ text(std::to_string(margin_level_struct.margin)) }),
-                    td({ text(std::to_string(margin_level_struct.margin_free)) }),
-                    td({ text(std::to_string(margin_level_struct.margin_level)) }),
-                    td({ text(currency) }),
+                    td({text(std::to_string(account.login))}),
+                    td({text(account.name)}),
+                    td({text(std::to_string(margin_level_struct.leverage))}),
+                    td({text(std::to_string(margin_level_struct.balance))}),
+                    td({text(std::to_string(margin_level_struct.credit))}),
+                    td({text(std::to_string(floating_pl))}),
+                    td({text(std::to_string(margin_level_struct.equity))}),
+                    td({text(std::to_string(margin_level_struct.margin))}),
+                    td({text(std::to_string(margin_level_struct.margin_free))}),
+                    td({text(std::to_string(margin_level_struct.margin_level))}),
+                    td({text(currency)}),
                 }));
             }
         }
@@ -155,12 +159,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
         for (const auto& pair : totals_map) {
             const Total& total = pair.second;
 
-            std::cout << "  Balance: " << round_to_two_digits(total.balance) << std::endl;
-            std::cout << "  Credit: " << round_to_two_digits(total.credit) << std::endl;
-            std::cout << "  Floating P/L: " << round_to_two_digits(total.floating_pl) << std::endl;
-            std::cout << "  Equity: " << round_to_two_digits(total.equity) << std::endl;
-            std::cout << "  Margin: " << round_to_two_digits(total.margin) << std::endl;
-            std::cout << "  Free Margin: " << round_to_two_digits(total.margin_free) << std::endl;
+            std::cout << "  Balance: " << format_for_AST(total.balance) << std::endl;
+            std::cout << "  Credit: " << format_for_AST(total.credit) << std::endl;
+            std::cout << "  Floating P/L: " << format_for_AST(total.floating_pl) << std::endl;
+            std::cout << "  Equity: " << format_for_AST(total.equity) << std::endl;
+            std::cout << "  Margin: " << format_for_AST(total.margin) << std::endl;
+            std::cout << "  Free Margin: " << format_for_AST(total.margin_free) << std::endl;
             std::cout << "  Currency: " << total.currency << std::endl;
             std::cout << "=================" << std::endl;
         }
