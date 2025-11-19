@@ -62,7 +62,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return "N/A"; // группа не найдена - валюта не определена
     };
 
-    // Лямбда подготавливающаяя значения double для вставки в AST (округление до 2х знаков)
+    // Лямбда подготавливающая значения double для вставки в AST (округление до 2х знаков)
     auto format_for_AST = [](double value) -> std::string {
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(2) << value;
