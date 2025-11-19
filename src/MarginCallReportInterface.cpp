@@ -102,7 +102,11 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 double floating_pl = 0.0;
                 MarginLevel margin_level_struct;
 
-                server->GetAccountBalanceByLogin(account.login, &margin_level_struct);
+                if (account.login != 0) {
+                    server->GetAccountBalanceByLogin(account.login, &margin_level_struct);
+                } else {
+                    std::cout << "Login: " << account.login << " ignored!" << std::endl;
+                }
 
                 floating_pl = margin_level_struct.equity - margin_level_struct.balance;
 
