@@ -102,8 +102,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
             std::cout << "Account level type: " << account.margin.level_type << std::endl;
 
-            // if (server->GetOpenTradesByLogin(account.login, &trades_vector) == RET_OK) {
-            if (account.margin.level_type > 0) {
+            if (server->GetOpenTradesByLogin(account.login, &trades_vector) == RET_OK) {
+            // if (account.margin.level_type > 0) {
                 double floating_pl = 0.0;
                 MarginLevel margin_level_struct;
 
