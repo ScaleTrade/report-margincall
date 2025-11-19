@@ -57,6 +57,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     // Лямбда для поиска валюты аккаунта по его группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
         std::cout << "Group name: " << group_name << std::endl;
+
         for (const auto& group : groups_vector) {
             std::cout << "Group group: " << group.group << std::endl;
             std::cout << "Group currency: " << group.currency << std::endl;
@@ -96,7 +97,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
         }));
 
         // Формирование строк
-        for (const auto& account :accounts_vector) {
+        for (const auto& account : accounts_vector) {
             // Открытые сделки аккаунта
             std::vector<TradeRecord> trades_vector;
 
@@ -111,11 +112,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
                 floating_pl = margin_level_struct.equity - margin_level_struct.balance;
 
-                std::cout << "Loaded groups(2): " << groups_vector.size() << std::endl;
+                std::cout << "Account group: " << account.group << std::endl;
 
                 std::string currency = get_group_currency(account.group);
 
-                std::cout << "Account group: " << account.group << std::endl;
                 std::cout << "Currency: " << currency << std::endl;
 
                 auto& total = totals_map[currency];
@@ -162,6 +162,15 @@ extern "C" void CreateReport(rapidjson::Value& request,
         for (const auto& pair : totals_map) {
             const Total& total = pair.second;
 
+            std::cout << "  Balance: " << format_for_AST(total.balance) << std::endl;
+            std::cout << "  Credit: " << format_for_AST(total.credit) << std::endl;
+            std::cout << "  Floating P/L: " << format_for_AST(total.floating_pl) << std::endl;
+            std::cout << "  Equity: " << format_for_AST(total.equity) << std::endl;
+            std::cout << "  Margin: " << format_for_AST(total.margin) << std::endl;
+            std::cout << "  Free Margin: " << format_for_AST(total.margin_free) << std::endl;
+            std::cout << "  Currency: " << total.currency << std::endl;
+            std::cout << "=================" << std::endl;
+
             table_rows.push_back(tr({
                 td({ text("TOTAL") }),
                 td({ text("") }),
@@ -176,20 +185,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 td({ text("") }),
                 td({ text(total.currency) }),
             }));
-        }
-
-        std::cout << "Total: " << std::endl;
-        for (const auto& pair : totals_map) {
-            const Total& total = pair.second;
-
-            std::cout << "  Balance: " << format_for_AST(total.balance) << std::endl;
-            std::cout << "  Credit: " << format_for_AST(total.credit) << std::endl;
-            std::cout << "  Floating P/L: " << format_for_AST(total.floating_pl) << std::endl;
-            std::cout << "  Equity: " << format_for_AST(total.equity) << std::endl;
-            std::cout << "  Margin: " << format_for_AST(total.margin) << std::endl;
-            std::cout << "  Free Margin: " << format_for_AST(total.margin_free) << std::endl;
-            std::cout << "  Currency: " << total.currency << std::endl;
-            std::cout << "=================" << std::endl;
         }
 
         return table(table_rows, props({{"className", "data-table"}}));
