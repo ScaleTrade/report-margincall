@@ -94,7 +94,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
             // Открытые сделки аккаунта
             std::vector<TradeRecord> trades_vector;
 
-            if (server->GetOpenTradesByLogin(account.login, &trades_vector) == RET_OK) {
+            // if (server->GetOpenTradesByLogin(account.login, &trades_vector) == RET_OK) {
+            if (account.margin.level_type > 0) {
                 double floating_pl = 0.0;
                 MarginLevel margin_level_struct;
 
@@ -145,6 +146,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
         }
 
         // Формирование строк Total
+        std::cout << "TOTAL:" << std::endl;
+
         for (const auto& pair : totals_map) {
             const Total& total = pair.second;
 
