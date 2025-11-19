@@ -56,6 +56,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
         std::cout << "Group name: " << group_name << std::endl;
         for (const auto& group : groups_vector) {
+            std::cout << "Group group: " << group.group << std::endl;
+            std::cout << "Group currency: " << group.currency << std::endl;
             if (group.group == group_name) {
                 return group.currency;
             }
