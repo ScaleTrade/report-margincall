@@ -53,6 +53,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     }
 
     std::cout << "Loaded groups: " << groups_vector.size() << std::endl;
+    std::cout << "=================" << std::endl;
 
     // Лямбда для поиска валюты аккаунта по его группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
@@ -101,7 +102,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
             // Открытые сделки аккаунта
             std::vector<TradeRecord> trades_vector;
 
-            std::cout << "Account level type: " << account.margin.level_type << std::endl;
+            // std::cout << "Account level type: " << account.margin.level_type << std::endl;
 
             if (server->GetOpenTradesByLogin(account.login, &trades_vector) == RET_OK) {
             // if (account.margin.level_type > 0) {
