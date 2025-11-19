@@ -124,6 +124,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 std::cout << "Margin: " << margin_level_struct.margin << std::endl;
                 std::cout << "Free Margin: " << margin_level_struct.margin_free << std::endl;
                 std::cout << "Margin Level: " << margin_level_struct.margin_level << std::endl;
+                std::cout << "Currency: " << currency << std::endl;
                 std::cout << "=================" << std::endl;
 
                 table_rows.push_back(tr({
