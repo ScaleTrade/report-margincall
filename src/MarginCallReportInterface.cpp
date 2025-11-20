@@ -143,8 +143,20 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
         }
 
+        // Формирование строк Total
+        std::cout << "TOTAL:" << std::endl;
+
         for (const auto& pair : totals_map) {
             const Total& total = pair.second;
+
+            std::cout << "  Balance: " << format_for_AST(total.balance) << std::endl;
+            std::cout << "  Credit: " << format_for_AST(total.credit) << std::endl;
+            std::cout << "  Floating P/L: " << format_for_AST(total.floating_pl) << std::endl;
+            std::cout << "  Equity: " << format_for_AST(total.equity) << std::endl;
+            std::cout << "  Margin: " << format_for_AST(total.margin) << std::endl;
+            std::cout << "  Free Margin: " << format_for_AST(total.margin_free) << std::endl;
+            std::cout << "  Currency: " << total.currency << std::endl;
+            std::cout << "=================" << std::endl;
 
             table_rows.push_back(tr({
                 td({ text("TOTAL") }),
