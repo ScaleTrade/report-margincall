@@ -113,19 +113,19 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 total.margin += margin_level.margin;
                 total.margin_free += margin_level.margin_free;
 
-                std::cout << "=================" << std::endl;
-                std::cout << "Login: " << account.login << std::endl;
-                std::cout << "Name: " << account.name << std::endl;
-                std::cout << "Leverage: " << margin_level.leverage << std::endl;
-                std::cout << "Balance: " << margin_level.balance << std::endl;
-                std::cout << "Credit: " << margin_level.credit << std::endl;
-                std::cout << "Floating P/L: " << floating_pl << std::endl;
-                std::cout << "Equity: " << margin_level.equity << std::endl;
-                std::cout << "Margin: " << margin_level.margin << std::endl;
-                std::cout << "Free Margin: " << margin_level.margin_free << std::endl;
-                std::cout << "Margin Level: " << margin_level.margin_level << std::endl;
-                std::cout << "Currency: " << currency << std::endl;
-                std::cout << "=================" << std::endl;
+                // std::cout << "=================" << std::endl;
+                // std::cout << "Login: " << account.login << std::endl;
+                // std::cout << "Name: " << account.name << std::endl;
+                // std::cout << "Leverage: " << margin_level.leverage << std::endl;
+                // std::cout << "Balance: " << margin_level.balance << std::endl;
+                // std::cout << "Credit: " << margin_level.credit << std::endl;
+                // std::cout << "Floating P/L: " << floating_pl << std::endl;
+                // std::cout << "Equity: " << margin_level.equity << std::endl;
+                // std::cout << "Margin: " << margin_level.margin << std::endl;
+                // std::cout << "Free Margin: " << margin_level.margin_free << std::endl;
+                // std::cout << "Margin Level: " << margin_level.margin_level << std::endl;
+                // std::cout << "Currency: " << currency << std::endl;
+                // std::cout << "=================" << std::endl;
 
                 table_rows.push_back(tr({
                     td({text(std::to_string(account.login))}),
