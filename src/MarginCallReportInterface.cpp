@@ -45,15 +45,15 @@ extern "C" void CreateReport(rapidjson::Value& request,
     std::vector<AccountRecord> accounts_vector;
     std::vector<GroupRecord> groups_vector;
 
-    std::cout << "Accounts vector size: " << accounts_vector.size() << std::endl;
-    std::cout << "Groups vector size: " << groups_vector.size() << std::endl;
-
     try {
         server->GetAccountsByGroup(group_mask, &accounts_vector);
         server->GetAllGroups(&groups_vector);
     } catch (const std::exception& e) {
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
+
+    std::cout << "Accounts vector size: " << accounts_vector.size() << std::endl;
+    std::cout << "Groups vector size: " << groups_vector.size() << std::endl;
 
     // // Лямбда для поиска валюты аккаунта по группе
     // auto get_group_currency = [&](const std::string& group_name) -> std::string {
