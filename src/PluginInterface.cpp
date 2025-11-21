@@ -127,19 +127,19 @@ extern "C" void CreateReport(rapidjson::Value& request,
         }
 
         // Заголовок Total
-        table_rows.push_back(thead({
+        table_rows.push_back(tfoot({
             tr({
-                th({div({text("TOTAL:")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
-                th({div({text("")})}),
+                td({div({text("TOTAL:")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
             })
         }));
 

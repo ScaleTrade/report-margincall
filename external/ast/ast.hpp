@@ -113,6 +113,7 @@ namespace ast {
         TAG(li)
         TAG(table)
         TAG(thead)
+        TAG(tfoot)
         TAG(tbody)
         TAG(tr)
         TAG(td)
