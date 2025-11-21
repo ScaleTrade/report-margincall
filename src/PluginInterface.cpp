@@ -74,17 +74,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
         // Заголовки
         table_rows.push_back(thead({
             tr({
-                th({ text("Login") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Name") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Leverage") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Balance") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Credit") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Floating P/L") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Equity") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Margin") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Free Margin") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Margin Level") }, props({{"className", "sbxTable__tableTh"}})),
-                th({ text("Currency") }, props({{"className", "sbxTable__tableTh"}})),
+                th({div({text("Login")})}),
+                th({div({text("Name")})}),
+                th({div({text("Description")})}),
+                th({div({text("Balance")})}),
+                th({div({text("Credit")})}),
+                th({div({text("Floating P/L")})}),
+                th({div({text("Equity")})}),
+                th({div({text("Margin")})}),
+                th({div({text("Free Margin")})}),
+                th({div({text("Margin Level")})}),
+                th({div({text("Currency")})}),
             })
         }));
 
@@ -111,27 +111,44 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 total.margin_free += margin_level.margin_free;
 
                 table_rows.push_back(tr({
-                    td({text(std::to_string(account.login))}),
-                    td({text(account.name)}),
-                    td({text(format_for_AST(margin_level.leverage))}),
-                    td({text(format_for_AST(margin_level.balance))}),
-                    td({text(format_for_AST(margin_level.credit))}),
-                    td({text(format_for_AST(floating_pl))}),
-                    td({text(format_for_AST(margin_level.equity))}),
-                    td({text(format_for_AST(margin_level.margin))}),
-                    td({text(format_for_AST(margin_level.margin_free))}),
-                    td({text(format_for_AST(margin_level.margin_level))}),
-                    td({text(currency)}),
+                    td({div({text(std::to_string(account.login))})}),
+                    td({div({text(account.name)})}),
+                    td({div({text(format_for_AST(margin_level.leverage))})}),
+                    td({div({text(format_for_AST(margin_level.balance))})}),
+                    td({div({text(format_for_AST(margin_level.credit))})}),
+                    td({div({text(format_for_AST(floating_pl))})}),
+                    td({div({text(format_for_AST(margin_level.equity))})}),
+                    td({div({text(format_for_AST(margin_level.margin))})}),
+                    td({div({text(format_for_AST(margin_level.margin_free))})}),
+                    td({div({text(format_for_AST(margin_level.margin_level))})}),
+                    td({div({text(currency)})}),
                 }));
             }
         }
+
+        // Заголовок Total
+        table_rows.push_back(thead({
+            tr({
+                th({div({text("TOTAL:")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+                th({div({text("")})}),
+            })
+        }));
 
         // Формирование строк Total
         for (const auto& pair : totals_map) {
             const Total& total = pair.second;
 
             table_rows.push_back(tr({
-                td({ text("TOTAL") }),
+                td({ text("") }),
                 td({ text("") }),
                 td({ text("") }),
                 td({ text(format_for_AST(total.balance)) }),
@@ -145,17 +162,14 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }));
         }
 
-        return table(table_rows, props({{"className", "sbxTable__table"}}));
+        return table(table_rows, props({{"className", "table"}}));
     };
 
-    JSONObject report_props = {
-        {"className", JSONValue("report")},
-    };
 
     const Node report = div({
         h1({ text("Margin Call Report") }),
         make_table(accounts_vector),
-    }, report_props);
+    });
 
     utils::CreateUI(report, response, allocator);
 }
