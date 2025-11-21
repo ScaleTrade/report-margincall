@@ -74,17 +74,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
         // Заголовки
         table_rows.push_back(thead({
             tr({
-                th({ text("Login") }),
-                th({ text("Name") }),
-                th({ text("Leverage") }),
-                th({ text("Balance") }),
-                th({ text("Credit") }),
-                th({ text("Floating P/L") }),
-                th({ text("Equity") }),
-                th({ text("Margin") }),
-                th({ text("Free Margin") }),
-                th({ text("Margin Level") }),
-                th({ text("Currency") }),
+                th({ text("Login") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Name") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Leverage") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Balance") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Credit") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Floating P/L") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Equity") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Margin") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Free Margin") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Margin Level") }, props({{"className", "sbxTable__tableTh"}})),
+                th({ text("Currency") }, props({{"className", "sbxTable__tableTh"}})),
             })
         }));
 
