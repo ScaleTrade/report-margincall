@@ -182,10 +182,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
     rapidjson::Value ui_obj(rapidjson::kObjectType);
     response.AddMember("ui", ui_obj, allocator);
 
-    // const Node report = div({
-    //     h1({ text("Margin Call Report") }),
-    //     make_table(accounts_vector),
-    // }, report_props);
+    const Node report = div({
+        h1({ text("Margin Call Report") }),
+        make_table(accounts_vector),
+    }, report_props);
 
-    // to_json(report, response, allocator);
+    to_json(report, response, allocator);
 }
