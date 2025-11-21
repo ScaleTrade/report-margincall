@@ -145,7 +145,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }));
         }
 
-        return table(table_rows, props({{"className", "data-table"}}));
+        return table(table_rows, props({{"className", "sbxTable__table"}}));
     };
 
     JSONObject report_props = {
