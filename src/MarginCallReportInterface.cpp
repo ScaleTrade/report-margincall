@@ -163,7 +163,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 }
 
 namespace report_utils {
-    void CreateUI(const ast::Node& node, rapidjson::Value& out, rapidjson::Document::AllocatorType& allocator) {
+    void CreateUI(const ast::Node& node, rapidjson::Value& response, rapidjson::Document::AllocatorType& allocator) {
         Value node_object(kObjectType);
         to_json(node, node_object, allocator);
 
@@ -179,8 +179,8 @@ namespace report_utils {
         Value uiObj(kObjectType);
         uiObj.AddMember("modal", model_object, allocator);
 
-        out.SetObject();
-        out.AddMember("ui", uiObj, allocator);
+        response.SetObject();
+        response.AddMember("ui", uiObj, allocator);
     }
 
 }

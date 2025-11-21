@@ -26,6 +26,6 @@ extern "C" {
 
 namespace report_utils {
     void CreateUI(const ast::Node& node,
-                  rapidjson::Value& out,
+                  rapidjson::Value& response,
                   rapidjson::Document::AllocatorType& allocator);
 }
