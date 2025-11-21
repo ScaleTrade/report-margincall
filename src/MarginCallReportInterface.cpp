@@ -187,5 +187,9 @@ extern "C" void CreateReport(rapidjson::Value& request,
     // Создаём Node, который содержит только эти props
     Node report = div({}, report_props);
 
+    Value ui_obj(kObjectType);
+    to_json_value(JSONValue(report.props["ui"]), ui_obj, allocator);
+    response = std::move(ui_obj);
+
     to_json(report, response, allocator);
 }
