@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast/ast.hpp"
+#include "ast/Ast.hpp"
 #include "Structures.hpp"
 
 namespace utils {

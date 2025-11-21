@@ -9,7 +9,7 @@
 #include <string>
 #include <iomanip>
 #include "Structures.hpp"
-#include "ast/ast.hpp"
+#include "ast/Ast.hpp"
 #include "Utils.hpp"
 
 extern "C" {
