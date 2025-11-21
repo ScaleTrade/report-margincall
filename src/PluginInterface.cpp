@@ -148,23 +148,22 @@ extern "C" void CreateReport(rapidjson::Value& request,
             const Total& total = pair.second;
 
             table_rows.push_back(tr({
-                td({ text("") }),
-                td({ text("") }),
-                td({ text("") }),
-                td({ text(format_for_AST(total.balance)) }),
-                td({ text(format_for_AST(total.credit)) }),
-                td({ text(format_for_AST(total.floating_pl)) }),
-                td({ text(format_for_AST(total.equity)) }),
-                td({ text(format_for_AST(total.margin)) }),
-                td({ text(format_for_AST(total.margin_free)) }),
-                td({ text("") }),
-                td({ text(total.currency) }),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text(format_for_AST(total.balance))})}),
+                td({div({text(format_for_AST(total.credit))})}),
+                td({div({text(format_for_AST(total.floating_pl))})}),
+                td({div({text(format_for_AST(total.equity))})}),
+                td({div({text(format_for_AST(total.margin))})}),
+                td({div({text(format_for_AST(total.margin_free))})}),
+                td({div({text("")})}),
+                td({div({text(total.currency)})}),
             }));
         }
 
         return table(table_rows, props({{"className", "table"}}));
     };
-
 
     const Node report = div({
         h1({ text("Margin Call Report") }),
