@@ -150,46 +150,63 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return table(table_rows, props({{"className", "data-table"}}));
     };
 
-    // const Node header_space = element("Space", {});
-    // const Node footer_space = element("Space", {});
-    //
-    // JSONObject modal_props = {
-    //     {"size", JSONValue("xxxl")},
-    //     {"headerContent", JSONArray{}}
-    // };
-    // JSONObject modal_object = {
-    //     {"size", JSONValue("xxxl")},
-    //     {"headerContent", JSONArray{
-    //         stringify(header_space),
-    //         }},
-    //     {"footerContent", JSONArray{
-    //         stringify(footer_space),
-    //         }},
-    //
-    //     {"content", JSONArray{}},
-    // };
-    // JSONObject ui_object = {
-    //     {"modal", JSONValue(modal_object)}
-    // };
-    // JSONObject report_props = {
-    //     {"className", JSONValue("report")},
-    //     {"ui", JSONValue(ui_object)}
-    // };
+    JSONObject report_props = {
+        {"className", JSONValue("report")},
+    };
 
-    // const Node report = div({
-    //     h1({ text("Margin Call Report") }),
-    //     make_table(accounts_vector),
-    // }, report_props);
-
-    JSONObject report_props;
-    report_props["ui"] = JSONObject{};   // <- Пустой объект
-
-    // Создаём Node, который содержит только эти props
-    Node report = div({}, report_props);
-
-    Value ui_obj(kObjectType);
-    to_json_value(JSONValue(report.props["ui"]), ui_obj, allocator);
-    response = std::move(ui_obj);
+    const Node report = div({
+        h1({ text("Margin Call Report") }),
+        make_table(accounts_vector),
+    }, report_props);
 
     to_json(report, response, allocator);
 }
+
+//
+// ui: {
+//     modal: {
+//         size: "xxxl",
+//         headerContent: [
+//           {
+//             type: "Space",
+//             children: [
+//               {
+//                 type: "#text",
+//                 props: {
+//                   value: row.name
+//                 },
+//               },
+//             ],
+//           },
+//         ],
+//         footerContent: [
+//           {
+//             type: "Space",
+//             props: {
+//               justifyContent: "space-between"
+//             },
+//             children: [
+//               {
+//                 type: "Button",
+//                 props: {
+//                   className: "form_action_button",
+//                   borderType: "danger",
+//                   buttonType: "outlined",
+//                   onClick: "{\"action\":\"CloseModal\"}",
+//                 },
+//                 children: [
+//                   {
+//                     type: "#text",
+//                     props: {
+//                       value: "Close"
+//                     },
+//                   },
+//                 ],
+//               },
+//             ],
+//           },
+//         ],
+//         content: [resp.data],
+//       },
+//     },
+//   };

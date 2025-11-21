@@ -218,5 +218,29 @@ inline std::string stringify(const Node& node) {
 // ---------- none helper ----------
 
 inline std::vector<Node> none() { return {}; }
+    
+    inline void create_modal_ui(const Node& node, Value& out, Document::AllocatorType& alloc) {
+    
+    Value content_array(kArrayType);
+    {
+        Value nodeObj(kObjectType);
+
+        Value childrenArr(kArrayType);
+        to_json(node, nodeObj, alloc);
+        content_array.PushBack(nodeObj, alloc);
+    }
+    
+    Value modal_object(kObjectType);
+    modal_object.AddMember("size", "xxxl", alloc);
+    modal_object.AddMember("headerContent", Value(kArrayType), alloc);
+    modal_object.AddMember("footerContent", Value(kArrayType), alloc);
+    modal_object.AddMember("content", content_array, alloc);
+
+    Value ui_object(kObjectType);
+    ui_object.AddMember("modal", modal_object, alloc);
+
+    out.SetObject();
+    out.AddMember("ui", ui_object, alloc);
+}
 
 } // namespace ast
