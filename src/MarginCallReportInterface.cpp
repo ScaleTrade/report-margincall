@@ -176,16 +176,20 @@ extern "C" void CreateReport(rapidjson::Value& request,
         {"ui", JSONValue(ui_object)}
     };
 
+    // const Node report = div({
+    //     h1({ text("Margin Call Report") }),
+    //     make_table(accounts_vector),
+    // }, report_props);
 
-    response.SetObject();
+    JSONObject root_props = {
+        {"ui", JSONValue(JSONObject{})}
+    };
 
-    rapidjson::Value ui_obj(rapidjson::kObjectType);
-    response.AddMember("ui", ui_obj, allocator);
+    Node report = element("root", {}, root_props);
+    rapidjson::Value tmp(rapidjson::kObjectType);
+    to_json(report, tmp, allocator);
 
-    const Node report = div({
-        h1({ text("Margin Call Report") }),
-        make_table(accounts_vector),
-    }, report_props);
+    // to_json(report, response, allocator);
+    response.CopyFrom(tmp["props"]["ui"], allocator);
 
-    to_json(report, response, allocator);
 }
