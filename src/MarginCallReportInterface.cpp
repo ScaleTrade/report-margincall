@@ -150,10 +150,37 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return table(table_rows, props({{"className", "data-table"}}));
     };
 
+    const Node header_space = element("Space", {});
+    const Node footer_space = element("Space", {});
+
+    JSONObject modal_props = {
+        {"size", JSONValue("xxxl")},
+        {"headerContent", JSONArray{}}
+    };
+    JSONObject modal_object = {
+        {"size", JSONValue("xxxl")},
+        {"headerContent", JSONArray{
+            stringify(header_space),
+            }},
+        {"footerContent", JSONArray{
+            stringify(footer_space),
+            }},
+
+        {"content", JSONArray{}},
+    };
+    JSONObject ui_object = {
+        {"modal", JSONValue(modal_object)}
+    };
+    JSONObject report_props = {
+        {"className", JSONValue("report")},
+        {"ui", JSONValue(ui_object)}
+    };
+
+
     const Node report = div({
         h1({ text("Margin Call Report") }),
         make_table(accounts_vector),
-    }, props({{"className", "report"}}));
+    }, report_props);
 
     to_json(report, response, allocator);
 }
