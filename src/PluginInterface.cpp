@@ -14,6 +14,18 @@ extern "C" void AboutReport(rapidjson::Value& request,
                           "Includes financial details such as balance, equity, margin, and full account details.",
                           allocator), allocator);
     response.AddMember("type", REPORT_GROUP_TYPE, allocator);
+
+    // Структуры с описаниями полей
+    rapidjson::Value structure_object(rapidjson::kObjectType);
+    rapidjson::Value test_field_object(rapidjson::kObjectType);
+
+    test_field_object.AddMember("type", rapidjson::Value().SetString("string", allocator), allocator);
+    test_field_object.AddMember("defaultValue", rapidjson::Value().SetString("*", allocator), allocator);
+    test_field_object.AddMember("isRequired", true, allocator);
+
+    structure_object.AddMember("test", test_field_object, allocator);
+
+    response.AddMember("structure", structure_object, allocator);
 }
 
 extern "C" void DestroyReport() {}
