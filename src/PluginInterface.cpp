@@ -7,7 +7,7 @@ extern "C" void AboutReport(rapidjson::Value& request,
                             rapidjson::Document::AllocatorType& allocator,
                             CServerInterface* server) {
     response.AddMember("version", 1, allocator);
-    response.AddMember("name", Value().SetString("Margin call report", allocator), allocator);
+    response.AddMember("name", Value().SetString("Margin Call report", allocator), allocator);
     response.AddMember(
         "description",
         Value().SetString("Lists accounts currently under margin call or stop out. "
