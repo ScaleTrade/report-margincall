@@ -49,13 +49,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
         server->GetAccountsByGroup(group_mask, &accounts_vector);
         server->GetAllGroups(&groups_vector);
+        server->GetMarginLevelByGroup(group_mask, &margins_tmp_vector);
 
-        for (const auto& group : groups_vector) {
-            server->GetMarginLevelByGroup(group.group, &margins_tmp_vector);
-
-            for (const auto& margin_level : margins_tmp_vector) {
-                margins_map[margin_level.login] = margin_level;
-            }
+        for (const auto& margin_level : margins_tmp_vector) {
+            margins_map[margin_level.login] = margin_level;
         }
 
     } catch (const std::exception& e) {
