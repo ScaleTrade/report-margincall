@@ -42,22 +42,13 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     std::vector<AccountRecord> accounts_vector;
     std::vector<GroupRecord> groups_vector;
-    std::vector<MarginLevel> margins_vector;
 
     try {
         server->GetAccountsByGroup(group_mask, &accounts_vector);
         server->GetAllGroups(&groups_vector);
-
-        for (auto& group : groups_vector) {
-            server->GetMarginLevelByGroup(group.group, &margins_vector);
-        }
     } catch (const std::exception& e) {
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
-
-    std::cout << "ACCOUNTS VECTOR SIZE: " << margins_vector.size() << std::endl;
-    std::cout << "MARGINS VECTOR SIZE: " << margins_vector.size() << std::endl;
-    std::cout << "GROUPS VECTOR SIZE: " << margins_vector.size() << std::endl;
 
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
