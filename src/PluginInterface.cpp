@@ -62,9 +62,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
 
-    std::cout << "ACCOUNTS VECTOR SIZE: " << accounts_vector.size() << std::endl;
-    std::cout << "MARGINS MAP SIZE: " << margins_map.size() << std::endl;
-
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
         for (const auto& group : groups_vector) {
@@ -108,8 +105,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
             std::vector<TradeRecord> trades_vector;
             double floating_pl = 0.0;
             MarginLevel margin_level = margins_map[account.login];
-
-            // server->GetAccountBalanceByLogin(account.login, &margin_level);
 
             if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
                 margin_level.level_type == MARGINLEVEL_STOPOUT) {
