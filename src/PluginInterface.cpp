@@ -42,13 +42,20 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     std::vector<AccountRecord> accounts_vector;
     std::vector<GroupRecord> groups_vector;
+    std::vector<MarginLevel> margins_vector;
 
     try {
         server->GetAccountsByGroup(group_mask, &accounts_vector);
         server->GetAllGroups(&groups_vector);
+
+        for (auto& group : groups_vector) {
+            server->GetMarginLevelByGroup(group.group, &margins_vector);
+        }
     } catch (const std::exception& e) {
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
+
+    std::cout << "MARGINS VECTOR SIZE: " << margins_vector.size() << std::endl;
 
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
@@ -68,7 +75,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     };
 
     // Таблица
-    auto make_table = [&](const std::vector<AccountRecord>& accounts) -> Node {
+    auto create_table = [&](const std::vector<AccountRecord>& accounts) -> Node {
         std::vector<Node> thead_rows;
         std::vector<Node> tbody_rows;
         std::vector<Node> tfoot_rows;
@@ -98,18 +105,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
             if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
                 margin_level.level_type == MARGINLEVEL_STOPOUT) {
-
                 floating_pl = margin_level.equity - margin_level.balance;
                 std::string currency = get_group_currency(account.group);
 
                 auto& total = totals_map[currency];
                 total.currency = currency;
-                total.balance      += margin_level.balance;
-                total.credit       += margin_level.credit;
-                total.floating_pl  += floating_pl;
-                total.equity       += margin_level.equity;
-                total.margin       += margin_level.margin;
-                total.margin_free  += margin_level.margin_free;
+                total.balance += margin_level.balance;
+                total.credit += margin_level.credit;
+                total.floating_pl += floating_pl;
+                total.equity += margin_level.equity;
+                total.margin += margin_level.margin;
+                total.margin_free += margin_level.margin_free;
 
                 tbody_rows.push_back(tr({
                     td({div({text(std::to_string(account.login))})}),
@@ -161,15 +167,15 @@ extern "C" void CreateReport(rapidjson::Value& request,
         }
 
         return table({
-            thead(thead_rows),
-            tbody(tbody_rows),
-            tfoot(tfoot_rows),
-        }, props({{"className", "table"}}));
+                         thead(thead_rows),
+                         tbody(tbody_rows),
+                         tfoot(tfoot_rows),
+                     }, props({{"className", "table"}}));
     };
 
     const Node report = div({
         h1({ text("Margin Call Report") }),
-        make_table(accounts_vector),
+        create_table(accounts_vector),
     });
 
     utils::CreateUI(report, response, allocator);
