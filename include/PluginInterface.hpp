@@ -8,6 +8,7 @@
 #include <atomic>
 #include <string>
 #include <iomanip>
+#include <unordered_map>
 #include "Structures.hpp"
 #include "ast/Ast.hpp"
 #include "Utils.hpp"

@@ -42,13 +42,28 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     std::vector<AccountRecord> accounts_vector;
     std::vector<GroupRecord> groups_vector;
+    std::unordered_map<int, MarginLevel> margins_map;
 
     try {
+        std::vector<MarginLevel> margins_tmp_vector;
+
         server->GetAccountsByGroup(group_mask, &accounts_vector);
         server->GetAllGroups(&groups_vector);
+
+        for (const auto& group : groups_vector) {
+            server->GetMarginLevelByGroup(group.group, &margins_tmp_vector);
+
+            for (const auto& margin_level : margins_tmp_vector) {
+                margins_map[margin_level.login] = margin_level;
+            }
+        }
+
     } catch (const std::exception& e) {
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
+
+    std::cout << "ACCOUNTS VECTOR SIZE: " << accounts_vector.size() << std::endl;
+    std::cout << "MARGINS MAP SIZE: " << margins_map.size() << std::endl;
 
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
@@ -92,9 +107,9 @@ extern "C" void CreateReport(rapidjson::Value& request,
         for (const auto& account : accounts) {
             std::vector<TradeRecord> trades_vector;
             double floating_pl = 0.0;
-            MarginLevel margin_level;
+            MarginLevel margin_level = margins_map[account.login];
 
-            server->GetAccountBalanceByLogin(account.login, &margin_level);
+            // server->GetAccountBalanceByLogin(account.login, &margin_level);
 
             if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
                 margin_level.level_type == MARGINLEVEL_STOPOUT) {
