@@ -55,7 +55,9 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
 
+    std::cout << "ACCOUNTS VECTOR SIZE: " << margins_vector.size() << std::endl;
     std::cout << "MARGINS VECTOR SIZE: " << margins_vector.size() << std::endl;
+    std::cout << "GROUPS VECTOR SIZE: " << margins_vector.size() << std::endl;
 
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
