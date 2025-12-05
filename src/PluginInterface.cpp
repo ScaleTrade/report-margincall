@@ -70,112 +70,172 @@ extern "C" void CreateReport(rapidjson::Value& request,
     };
 
     // Лямбда подготавливающая значения double для вставки в AST (округление до 2-х знаков)
-    auto format_for_AST = [](double value) -> std::string {
+    auto format_double_for_AST = [](double value) -> std::string {
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(2) << value;
         return oss.str();
     };
 
+    // v.1
     // Таблица
-    auto create_table = [&](const std::vector<AccountRecord>& accounts) -> Node {
-        std::vector<Node> thead_rows;
-        std::vector<Node> tbody_rows;
-        std::vector<Node> tfoot_rows;
+    // auto create_table = [&](const std::vector<AccountRecord>& accounts) -> Node {
+    //     std::vector<Node> thead_rows;
+    //     std::vector<Node> tbody_rows;
+    //     std::vector<Node> tfoot_rows;
+    //
+    //     // Thead
+    //     thead_rows.push_back(tr({
+    //         th({div({text("Login")})}),
+    //         th({div({text("Name")})}),
+    //         th({div({text("Description")})}),
+    //         th({div({text("Balance")})}),
+    //         th({div({text("Credit")})}),
+    //         th({div({text("Floating P/L")})}),
+    //         th({div({text("Equity")})}),
+    //         th({div({text("Margin")})}),
+    //         th({div({text("Free Margin")})}),
+    //         th({div({text("Margin Level")})}),
+    //         th({div({text("Currency")})}),
+    //     }));
+    //
+    //     // Tbody
+    //     for (const auto& account : accounts) {
+    //         std::vector<TradeRecord> trades_vector;
+    //         double floating_pl = 0.0;
+    //         MarginLevel margin_level = margins_map[account.login];
+    //
+    //         if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
+    //             margin_level.level_type == MARGINLEVEL_STOPOUT) {
+    //             floating_pl = margin_level.equity - margin_level.balance;
+    //             std::string currency = get_group_currency(account.group);
+    //
+    //             auto& total = totals_map[currency];
+    //             total.currency = currency;
+    //             total.balance += margin_level.balance;
+    //             total.credit += margin_level.credit;
+    //             total.floating_pl += floating_pl;
+    //             total.equity += margin_level.equity;
+    //             total.margin += margin_level.margin;
+    //             total.margin_free += margin_level.margin_free;
+    //
+    //             tbody_rows.push_back(tr({
+    //                 td({div({text(std::to_string(account.login))})}),
+    //                 td({div({text(account.name)})}),
+    //                 td({div({text(format_double_for_AST(margin_level.leverage))})}),
+    //                 td({div({text(format_double_for_AST(margin_level.balance))})}),
+    //                 td({div({text(format_double_for_AST(margin_level.credit))})}),
+    //                 td({div({text(format_double_for_AST(floating_pl))})}),
+    //                 td({div({text(format_double_for_AST(margin_level.equity))})}),
+    //                 td({div({text(format_double_for_AST(margin_level.margin))})}),
+    //                 td({div({text(format_double_for_AST(margin_level.margin_free))})}),
+    //                 td({div({text(format_double_for_AST(margin_level.margin_level))})}),
+    //                 td({div({text(currency)})}),
+    //             }));
+    //         }
+    //     }
+    //
+    //     // Tfoot
+    //     tfoot_rows.push_back(tr({
+    //         td({div({text("TOTAL:")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //     }));
+    //
+    //     for (const auto& pair : totals_map) {
+    //         const Total& total = pair.second;
+    //
+    //         tfoot_rows.push_back(tr({
+    //             td({div({text("")})}),
+    //             td({div({text("")})}),
+    //             td({div({text("")})}),
+    //             td({div({text(format_double_for_AST(total.balance))})}),
+    //             td({div({text(format_double_for_AST(total.credit))})}),
+    //             td({div({text(format_double_for_AST(total.floating_pl))})}),
+    //             td({div({text(format_double_for_AST(total.equity))})}),
+    //             td({div({text(format_double_for_AST(total.margin))})}),
+    //             td({div({text(format_double_for_AST(total.margin_free))})}),
+    //             td({div({text("")})}),
+    //             td({div({text(total.currency)})}),
+    //         }));
+    //     }
+    //
+    //     return table({
+    //                      thead(thead_rows),
+    //                      tbody(tbody_rows),
+    //                      tfoot(tfoot_rows),
+    //                  }, props({{"className", "table"}}));
+    // };
 
-        // Thead
-        thead_rows.push_back(tr({
-            th({div({text("Login")})}),
-            th({div({text("Name")})}),
-            th({div({text("Description")})}),
-            th({div({text("Balance")})}),
-            th({div({text("Credit")})}),
-            th({div({text("Floating P/L")})}),
-            th({div({text("Equity")})}),
-            th({div({text("Margin")})}),
-            th({div({text("Free Margin")})}),
-            th({div({text("Margin Level")})}),
-            th({div({text("Currency")})}),
-        }));
+    // v.2
+    TableBuilder table_builder("MarginCallReportTable");
 
-        // Tbody
-        for (const auto& account : accounts) {
-            std::vector<TradeRecord> trades_vector;
-            double floating_pl = 0.0;
-            MarginLevel margin_level = margins_map[account.login];
+    table_builder.SetIdColumn("login");
+    table_builder.SetOrderBy("login", "DESC");
+    table_builder.EnableRefreshButton(false);
+    table_builder.EnableBookmarksButton(false);
+    table_builder.EnableExportButton(true);
 
-            if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
-                margin_level.level_type == MARGINLEVEL_STOPOUT) {
-                floating_pl = margin_level.equity - margin_level.balance;
-                std::string currency = get_group_currency(account.group);
+    table_builder.AddColumn({"login", "LOGIN"});
+    table_builder.AddColumn({"name", "NAME"});
+    table_builder.AddColumn({"leverage", "LEVERAGE"});
+    table_builder.AddColumn({"balance", "BALANCE"});
+    table_builder.AddColumn({"credit", "CREDIT"});
+    table_builder.AddColumn({"floating_pl", "Floating P/L"});
+    table_builder.AddColumn({"equity", "EQUITY"});
+    table_builder.AddColumn({"margin", "MARGIN"});
+    table_builder.AddColumn({"margin_free", "MARGIN_FREE"});
+    table_builder.AddColumn({"margin_level", "MARGIN_LEVEL"});
+    table_builder.AddColumn({"currency", "CURRENCY"});
 
-                auto& total = totals_map[currency];
-                total.currency = currency;
-                total.balance += margin_level.balance;
-                total.credit += margin_level.credit;
-                total.floating_pl += floating_pl;
-                total.equity += margin_level.equity;
-                total.margin += margin_level.margin;
-                total.margin_free += margin_level.margin_free;
+    for (const auto& account : accounts_vector) {
+        std::vector<TradeRecord> trades_vector;
+        double floating_pl = 0.0;
+        MarginLevel margin_level = margins_map[account.login];
 
-                tbody_rows.push_back(tr({
-                    td({div({text(std::to_string(account.login))})}),
-                    td({div({text(account.name)})}),
-                    td({div({text(format_for_AST(margin_level.leverage))})}),
-                    td({div({text(format_for_AST(margin_level.balance))})}),
-                    td({div({text(format_for_AST(margin_level.credit))})}),
-                    td({div({text(format_for_AST(floating_pl))})}),
-                    td({div({text(format_for_AST(margin_level.equity))})}),
-                    td({div({text(format_for_AST(margin_level.margin))})}),
-                    td({div({text(format_for_AST(margin_level.margin_free))})}),
-                    td({div({text(format_for_AST(margin_level.margin_level))})}),
-                    td({div({text(currency)})}),
-                }));
-            }
+        if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
+            margin_level.level_type == MARGINLEVEL_STOPOUT) {
+            floating_pl = margin_level.equity - margin_level.balance;
+            std::string currency = get_group_currency(account.group);
+
+            auto& total = totals_map[currency];
+            total.currency = currency;
+            total.balance += margin_level.balance;
+            total.credit += margin_level.credit;
+            total.floating_pl += floating_pl;
+            total.equity += margin_level.equity;
+            total.margin += margin_level.margin;
+            total.margin_free += margin_level.margin_free;
+
+            table_builder.AddRow({
+                {"login", std::to_string(account.login)},
+                {"name", account.name},
+                {"leverage", format_double_for_AST(margin_level.leverage)},
+                {"balance", format_double_for_AST(margin_level.balance)},
+                {"credit", format_double_for_AST(margin_level.credit)},
+                {"floating_pl", format_double_for_AST(floating_pl)},
+                {"equity", format_double_for_AST(margin_level.equity)},
+                {"margin", format_double_for_AST(margin_level.margin)},
+                {"margin_free", format_double_for_AST(margin_level.margin_free)},
+                {"margin_level", format_double_for_AST(margin_level.margin_level)},
+                {"currency", currency}
+            });
         }
+    }
 
-        // Tfoot
-        tfoot_rows.push_back(tr({
-            td({div({text("TOTAL:")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-        }));
-
-        for (const auto& pair : totals_map) {
-            const Total& total = pair.second;
-
-            tfoot_rows.push_back(tr({
-                td({div({text("")})}),
-                td({div({text("")})}),
-                td({div({text("")})}),
-                td({div({text(format_for_AST(total.balance))})}),
-                td({div({text(format_for_AST(total.credit))})}),
-                td({div({text(format_for_AST(total.floating_pl))})}),
-                td({div({text(format_for_AST(total.equity))})}),
-                td({div({text(format_for_AST(total.margin))})}),
-                td({div({text(format_for_AST(total.margin_free))})}),
-                td({div({text("")})}),
-                td({div({text(total.currency)})}),
-            }));
-        }
-
-        return table({
-                         thead(thead_rows),
-                         tbody(tbody_rows),
-                         tfoot(tfoot_rows),
-                     }, props({{"className", "table"}}));
-    };
+    const JSONObject table_props = table_builder.CreateTableProps();
+    const Node table_node = Table({}, table_props);
 
     const Node report = div({
         h1({ text("Margin Call Report") }),
-        create_table(accounts_vector),
+        table_node
     });
 
     utils::CreateUI(report, response, allocator);
