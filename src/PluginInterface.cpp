@@ -22,24 +22,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
                              rapidjson::Value& response,
                              rapidjson::Document::AllocatorType& allocator,
                              CServerInterface* server) {
-    // Структура накопления итогов
-    struct Total {
-        std::string currency;
-        double balance = 0.0;
-        double credit = 0.0;
-        double floating_pl = 0.0;
-        double equity = 0.0;
-        double margin = 0.0;
-        double margin_free = 0.0;
-    };
-
-    std::unordered_map<std::string, Total> totals_map;
-
     std::string group_mask;
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
 
+    std::unordered_map<std::string, Total> totals_map;
     std::vector<AccountRecord> accounts_vector;
     std::vector<GroupRecord> groups_vector;
     std::unordered_map<int, MarginLevel> margins_map;
@@ -76,105 +64,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return oss.str();
     };
 
-    // v.1
-    // Таблица
-    // auto create_table = [&](const std::vector<AccountRecord>& accounts) -> Node {
-    //     std::vector<Node> thead_rows;
-    //     std::vector<Node> tbody_rows;
-    //     std::vector<Node> tfoot_rows;
-    //
-    //     // Thead
-    //     thead_rows.push_back(tr({
-    //         th({div({text("Login")})}),
-    //         th({div({text("Name")})}),
-    //         th({div({text("Description")})}),
-    //         th({div({text("Balance")})}),
-    //         th({div({text("Credit")})}),
-    //         th({div({text("Floating P/L")})}),
-    //         th({div({text("Equity")})}),
-    //         th({div({text("Margin")})}),
-    //         th({div({text("Free Margin")})}),
-    //         th({div({text("Margin Level")})}),
-    //         th({div({text("Currency")})}),
-    //     }));
-    //
-    //     // Tbody
-    //     for (const auto& account : accounts) {
-    //         std::vector<TradeRecord> trades_vector;
-    //         double floating_pl = 0.0;
-    //         MarginLevel margin_level = margins_map[account.login];
-    //
-    //         if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
-    //             margin_level.level_type == MARGINLEVEL_STOPOUT) {
-    //             floating_pl = margin_level.equity - margin_level.balance;
-    //             std::string currency = get_group_currency(account.group);
-    //
-    //             auto& total = totals_map[currency];
-    //             total.currency = currency;
-    //             total.balance += margin_level.balance;
-    //             total.credit += margin_level.credit;
-    //             total.floating_pl += floating_pl;
-    //             total.equity += margin_level.equity;
-    //             total.margin += margin_level.margin;
-    //             total.margin_free += margin_level.margin_free;
-    //
-    //             tbody_rows.push_back(tr({
-    //                 td({div({text(std::to_string(account.login))})}),
-    //                 td({div({text(account.name)})}),
-    //                 td({div({text(format_double_for_AST(margin_level.leverage))})}),
-    //                 td({div({text(format_double_for_AST(margin_level.balance))})}),
-    //                 td({div({text(format_double_for_AST(margin_level.credit))})}),
-    //                 td({div({text(format_double_for_AST(floating_pl))})}),
-    //                 td({div({text(format_double_for_AST(margin_level.equity))})}),
-    //                 td({div({text(format_double_for_AST(margin_level.margin))})}),
-    //                 td({div({text(format_double_for_AST(margin_level.margin_free))})}),
-    //                 td({div({text(format_double_for_AST(margin_level.margin_level))})}),
-    //                 td({div({text(currency)})}),
-    //             }));
-    //         }
-    //     }
-    //
-    //     // Tfoot
-    //     tfoot_rows.push_back(tr({
-    //         td({div({text("TOTAL:")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //     }));
-    //
-    //     for (const auto& pair : totals_map) {
-    //         const Total& total = pair.second;
-    //
-    //         tfoot_rows.push_back(tr({
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text(format_double_for_AST(total.balance))})}),
-    //             td({div({text(format_double_for_AST(total.credit))})}),
-    //             td({div({text(format_double_for_AST(total.floating_pl))})}),
-    //             td({div({text(format_double_for_AST(total.equity))})}),
-    //             td({div({text(format_double_for_AST(total.margin))})}),
-    //             td({div({text(format_double_for_AST(total.margin_free))})}),
-    //             td({div({text("")})}),
-    //             td({div({text(total.currency)})}),
-    //         }));
-    //     }
-    //
-    //     return table({
-    //                      thead(thead_rows),
-    //                      tbody(tbody_rows),
-    //                      tfoot(tfoot_rows),
-    //                  }, props({{"className", "table"}}));
-    // };
-
-    // v.2
     TableBuilder table_builder("MarginCallReportTable");
 
     table_builder.SetIdColumn("login");
@@ -182,6 +71,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableRefreshButton(false);
     table_builder.EnableBookmarksButton(false);
     table_builder.EnableExportButton(true);
+    table_builder.EnableTotal(true);
+    table_builder.SetTotalDataTitle("TOTAL");
 
     table_builder.AddColumn({"login", "LOGIN"});
     table_builder.AddColumn({"name", "NAME"});
@@ -202,33 +93,55 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
         if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
             margin_level.level_type == MARGINLEVEL_STOPOUT) {
-            floating_pl = margin_level.equity - margin_level.balance;
+
+            double multiplier = 1;
             std::string currency = get_group_currency(account.group);
 
-            auto& total = totals_map[currency];
-            total.currency = currency;
-            total.balance += margin_level.balance;
-            total.credit += margin_level.credit;
-            total.floating_pl += floating_pl;
-            total.equity += margin_level.equity;
-            total.margin += margin_level.margin;
-            total.margin_free += margin_level.margin_free;
+            if (currency != "USD") {
+                try {
+                    server->CalculateConvertRateByCurrency(currency, "USD", OP_SELL, &multiplier);
+                } catch (const std::exception& e) {
+                    std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
+                }
+            }
+
+            floating_pl = margin_level.equity - margin_level.balance;
+
+            totals_map["USD"].balance += margin_level.balance * multiplier;
+            totals_map["USD"].credit += margin_level.credit * multiplier;
+            totals_map["USD"].floating_pl += floating_pl * multiplier;
+            totals_map["USD"].equity += margin_level.equity * multiplier;
+            totals_map["USD"].margin += margin_level.margin * multiplier;
+            totals_map["USD"].margin_free += margin_level.margin_free * multiplier;
 
             table_builder.AddRow({
                 {"login", std::to_string(account.login)},
                 {"name", account.name},
                 {"leverage", format_double_for_AST(margin_level.leverage)},
-                {"balance", format_double_for_AST(margin_level.balance)},
-                {"credit", format_double_for_AST(margin_level.credit)},
-                {"floating_pl", format_double_for_AST(floating_pl)},
-                {"equity", format_double_for_AST(margin_level.equity)},
-                {"margin", format_double_for_AST(margin_level.margin)},
-                {"margin_free", format_double_for_AST(margin_level.margin_free)},
+                {"balance", format_double_for_AST(margin_level.balance * multiplier)},
+                {"credit", format_double_for_AST(margin_level.credit * multiplier)},
+                {"floating_pl", format_double_for_AST(floating_pl * multiplier)},
+                {"equity", format_double_for_AST(margin_level.equity * multiplier)},
+                {"margin", format_double_for_AST(margin_level.margin * multiplier)},
+                {"margin_free", format_double_for_AST(margin_level.margin_free * multiplier)},
                 {"margin_level", format_double_for_AST(margin_level.margin_level)},
-                {"currency", currency}
+                {"currency", "USD"}
             });
         }
     }
+
+    // Total row
+    JSONArray totals_array;
+    totals_array.emplace_back(JSONObject{
+        {"balance", totals_map["USD"].balance},
+        {"credit", totals_map["USD"].credit},
+        {"equity", totals_map["USD"].equity},
+        {"floating_pl", totals_map["USD"].floating_pl},
+        {"margin", totals_map["USD"].margin},
+        {"margin_free", totals_map["USD"].margin_free},
+    });
+
+    table_builder.SetTotalData(totals_array);
 
     const JSONObject table_props = table_builder.CreateTableProps();
     const Node table_node = Table({}, table_props);
