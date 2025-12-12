@@ -47,23 +47,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
 
-    // Лямбда для поиска валюты аккаунта по группе
-    auto get_group_currency = [&](const std::string& group_name) -> std::string {
-        for (const auto& group : groups_vector) {
-            if (group.group == group_name) {
-                return group.currency;
-            }
-        }
-        return "N/A"; // группа не найдена - валюта не определена
-    };
-
-    // Лямбда подготавливающая значения double для вставки в AST (округление до 2-х знаков)
-    auto format_double_for_AST = [](double value) -> std::string {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(2) << value;
-        return oss.str();
-    };
-
     TableBuilder table_builder("MarginCallReportTable");
 
     table_builder.SetIdColumn("login");
@@ -74,17 +57,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableTotal(true);
     table_builder.SetTotalDataTitle("TOTAL");
 
-    table_builder.AddColumn({"login", "LOGIN"});
-    table_builder.AddColumn({"name", "NAME"});
-    table_builder.AddColumn({"leverage", "LEVERAGE"});
-    table_builder.AddColumn({"balance", "BALANCE"});
-    table_builder.AddColumn({"credit", "CREDIT"});
-    table_builder.AddColumn({"floating_pl", "Floating P/L"});
-    table_builder.AddColumn({"equity", "EQUITY"});
-    table_builder.AddColumn({"margin", "MARGIN"});
-    table_builder.AddColumn({"margin_free", "MARGIN_FREE"});
-    table_builder.AddColumn({"margin_level", "MARGIN_LEVEL"});
-    table_builder.AddColumn({"currency", "CURRENCY"});
+    table_builder.AddColumn({"login", "LOGIN", 1});
+    table_builder.AddColumn({"name", "NAME", 2});
+    table_builder.AddColumn({"leverage", "LEVERAGE", 3});
+    table_builder.AddColumn({"balance", "BALANCE", 4});
+    table_builder.AddColumn({"credit", "CREDIT", 5});
+    table_builder.AddColumn({"floating_pl", "Floating P/L", 6});
+    table_builder.AddColumn({"equity", "EQUITY", 7});
+    table_builder.AddColumn({"margin", "MARGIN", 8});
+    table_builder.AddColumn({"margin_free", "MARGIN_FREE", 9});
+    table_builder.AddColumn({"margin_level", "MARGIN_LEVEL", 10});
+    table_builder.AddColumn({"currency", "CURRENCY", 11});
 
     for (const auto& account : accounts_vector) {
         std::vector<TradeRecord> trades_vector;
@@ -95,7 +78,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
             margin_level.level_type == MARGINLEVEL_STOPOUT) {
 
             double multiplier = 1;
-            std::string currency = get_group_currency(account.group);
+            std::string currency = utils::GetGroupCurrencyByName(groups_vector, account.group);
 
             if (currency != "USD") {
                 try {
@@ -115,16 +98,16 @@ extern "C" void CreateReport(rapidjson::Value& request,
             totals_map["USD"].margin_free += margin_level.margin_free * multiplier;
 
             table_builder.AddRow({
-                {"login", std::to_string(account.login)},
+                {"login", utils::TruncateDouble(account.login, 0)},
                 {"name", account.name},
-                {"leverage", format_double_for_AST(margin_level.leverage)},
-                {"balance", format_double_for_AST(margin_level.balance * multiplier)},
-                {"credit", format_double_for_AST(margin_level.credit * multiplier)},
-                {"floating_pl", format_double_for_AST(floating_pl * multiplier)},
-                {"equity", format_double_for_AST(margin_level.equity * multiplier)},
-                {"margin", format_double_for_AST(margin_level.margin * multiplier)},
-                {"margin_free", format_double_for_AST(margin_level.margin_free * multiplier)},
-                {"margin_level", format_double_for_AST(margin_level.margin_level)},
+                {"leverage", utils::TruncateDouble(margin_level.leverage, 0)},
+                {"balance", utils::TruncateDouble(margin_level.balance * multiplier, 2)},
+                {"credit", utils::TruncateDouble(margin_level.credit * multiplier, 2)},
+                {"floating_pl", utils::TruncateDouble(floating_pl * multiplier, 2)},
+                {"equity", utils::TruncateDouble(margin_level.equity * multiplier, 2)},
+                {"margin", utils::TruncateDouble(margin_level.margin * multiplier, 2)},
+                {"margin_free", utils::TruncateDouble(margin_level.margin_free * multiplier, 2)},
+                {"margin_level", utils::TruncateDouble(margin_level.margin_level, 2)},
                 {"currency", "USD"}
             });
         }
@@ -133,12 +116,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
     // Total row
     JSONArray totals_array;
     totals_array.emplace_back(JSONObject{
-        {"balance", totals_map["USD"].balance},
-        {"credit", totals_map["USD"].credit},
-        {"equity", totals_map["USD"].equity},
-        {"floating_pl", totals_map["USD"].floating_pl},
-        {"margin", totals_map["USD"].margin},
-        {"margin_free", totals_map["USD"].margin_free},
+        {"balance", utils::TruncateDouble(totals_map["USD"].balance, 2)},
+        {"credit", utils::TruncateDouble(totals_map["USD"].credit, 2)},
+        {"equity", utils::TruncateDouble(totals_map["USD"].equity, 2)},
+        {"floating_pl", utils::TruncateDouble(totals_map["USD"].floating_pl, 2)},
+        {"margin", utils::TruncateDouble(totals_map["USD"].margin, 2)},
+        {"margin_free", utils::TruncateDouble(totals_map["USD"].margin_free, 2)},
     });
 
     table_builder.SetTotalData(totals_array);
