@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cmath>
+#include <iomanip>
+#include <sstream>
 #include <vector>
 #include <string>
 #include "Structures.hpp"
