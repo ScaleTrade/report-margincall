@@ -51,6 +51,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     table_builder.SetIdColumn("login");
     table_builder.SetOrderBy("login", "DESC");
+    table_builder.EnableAutoSave(false);
     table_builder.EnableRefreshButton(false);
     table_builder.EnableBookmarksButton(false);
     table_builder.EnableExportButton(true);
@@ -98,17 +99,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
             totals_map["USD"].margin_free += margin_level.margin_free * multiplier;
 
             table_builder.AddRow({
-                {"login", utils::TruncateDouble(account.login, 0)},
-                {"name", account.name},
-                {"leverage", utils::TruncateDouble(margin_level.leverage, 0)},
-                {"balance", utils::TruncateDouble(margin_level.balance * multiplier, 2)},
-                {"credit", utils::TruncateDouble(margin_level.credit * multiplier, 2)},
-                {"floating_pl", utils::TruncateDouble(floating_pl * multiplier, 2)},
-                {"equity", utils::TruncateDouble(margin_level.equity * multiplier, 2)},
-                {"margin", utils::TruncateDouble(margin_level.margin * multiplier, 2)},
-                {"margin_free", utils::TruncateDouble(margin_level.margin_free * multiplier, 2)},
-                {"margin_level", utils::TruncateDouble(margin_level.margin_level, 2)},
-                {"currency", "USD"}
+                utils::TruncateDouble(account.login, 0),
+                account.name,
+                utils::TruncateDouble(margin_level.leverage, 0),
+                utils::TruncateDouble(margin_level.balance * multiplier, 2),
+                utils::TruncateDouble(margin_level.credit * multiplier, 2),
+                utils::TruncateDouble(floating_pl * multiplier, 2),
+                utils::TruncateDouble(margin_level.equity * multiplier, 2),
+                utils::TruncateDouble(margin_level.margin * multiplier, 2),
+                utils::TruncateDouble(margin_level.margin_free * multiplier, 2),
+                utils::TruncateDouble(margin_level.margin_level, 2),
+                "USD"
             });
         }
     }
@@ -129,7 +130,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     const JSONObject table_props = table_builder.CreateTableProps();
     const Node table_node = Table({}, table_props);
 
-    const Node report = div({
+    const Node report = Column({
         h1({ text("Margin Call Report") }),
         table_node
     });
