@@ -5,9 +5,9 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include "Structures.hpp"
+#include "Structures.h"
 #include "ast/Ast.hpp"
-#include "Structures.hpp"
+#include "Structures.h"
 
 namespace utils {
     void CreateUI(const ast::Node& node,
