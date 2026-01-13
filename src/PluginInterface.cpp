@@ -2,35 +2,37 @@
 
 using namespace ast;
 
-extern "C" void AboutReport(rapidjson::Value& request,
-                            rapidjson::Value& response,
+extern "C" void AboutReport(rapidjson::Value&                   request,
+                            rapidjson::Value&                   response,
                             rapidjson::Document::AllocatorType& allocator,
-                            CServerInterface* server) {
+                            CServerInterface*                   server) {
     response.AddMember("version", 1, allocator);
     response.AddMember("name", Value().SetString("Margin Call report", allocator), allocator);
     response.AddMember(
         "description",
-        Value().SetString("Lists accounts currently under margin call or stop out. "
-                          "Includes financial details such as balance, equity, margin, and full account details.",
-                          allocator), allocator);
+        Value().SetString(
+            "Lists accounts currently under margin call or stop out. "
+            "Includes financial details such as balance, equity, margin, and full account details.",
+            allocator),
+        allocator);
     response.AddMember("type", REPORT_GROUP_TYPE, allocator);
 }
 
 extern "C" void DestroyReport() {}
 
-extern "C" void CreateReport(rapidjson::Value& request,
-                             rapidjson::Value& response,
+extern "C" void CreateReport(rapidjson::Value&                   request,
+                             rapidjson::Value&                   response,
                              rapidjson::Document::AllocatorType& allocator,
-                             CServerInterface* server) {
+                             CServerInterface*                   server) {
     std::string group_mask;
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
 
     std::unordered_map<std::string, Total> totals_map;
-    std::vector<AccountRecord> accounts_vector;
-    std::vector<GroupRecord> groups_vector;
-    std::unordered_map<int, MarginLevel> margins_map;
+    std::vector<AccountRecord>             accounts_vector;
+    std::vector<GroupRecord>               groups_vector;
+    std::unordered_map<int, MarginLevel>   margins_map;
 
     try {
         std::vector<MarginLevel> margins_tmp_vector;
@@ -47,8 +49,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
     }
 
+    // Main table
     TableBuilder table_builder("MarginCallReportTable");
 
+    // Main table props
     table_builder.SetIdColumn("login");
     table_builder.SetOrderBy("login", "DESC");
     table_builder.EnableAutoSave(false);
@@ -58,28 +62,33 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableTotal(true);
     table_builder.SetTotalDataTitle("TOTAL");
 
-    table_builder.AddColumn({"login", "LOGIN", 1});
-    table_builder.AddColumn({"name", "NAME", 2});
-    table_builder.AddColumn({"leverage", "LEVERAGE", 3});
-    table_builder.AddColumn({"balance", "BALANCE", 4});
-    table_builder.AddColumn({"credit", "CREDIT", 5});
-    table_builder.AddColumn({"floating_pl", "Floating P/L", 6});
-    table_builder.AddColumn({"equity", "EQUITY", 7});
-    table_builder.AddColumn({"margin", "MARGIN", 8});
-    table_builder.AddColumn({"margin_free", "MARGIN_FREE", 9});
-    table_builder.AddColumn({"margin_level", "MARGIN_LEVEL", 10});
-    table_builder.AddColumn({"currency", "CURRENCY", 11});
+    // Filters
+    FilterConfig search_filter;
+    search_filter.type = FilterType::Search;
+
+    // Columns
+    table_builder.AddColumn({"login", "LOGIN", 1, search_filter});
+    table_builder.AddColumn({"name", "NAME", 2, search_filter});
+    table_builder.AddColumn({"leverage", "LEVERAGE", 3, search_filter});
+    table_builder.AddColumn({"balance", "BALANCE", 4, search_filter});
+    table_builder.AddColumn({"credit", "CREDIT", 5, search_filter});
+    table_builder.AddColumn({"floating_pl", "Floating P/L", 6, search_filter});
+    table_builder.AddColumn({"equity", "EQUITY", 7, search_filter});
+    table_builder.AddColumn({"margin", "MARGIN", 8, search_filter});
+    table_builder.AddColumn({"margin_free", "MARGIN_FREE", 9, search_filter});
+    table_builder.AddColumn({"margin_level", "MARGIN_LEVEL", 10, search_filter});
+    table_builder.AddColumn({"currency", "CURRENCY", 11, search_filter});
 
     for (const auto& account : accounts_vector) {
         std::vector<TradeRecord> trades_vector;
-        double floating_pl = 0.0;
-        MarginLevel margin_level = margins_map[account.login];
+        double                   floating_pl  = 0.0;
+        MarginLevel              margin_level = margins_map[account.login];
 
         if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
             margin_level.level_type == MARGINLEVEL_STOPOUT) {
 
-            double multiplier = 1;
-            std::string currency = utils::GetGroupCurrencyByName(groups_vector, account.group);
+            double      multiplier = 1;
+            std::string currency   = utils::GetGroupCurrencyByName(groups_vector, account.group);
 
             if (currency != "USD") {
                 try {
@@ -98,19 +107,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
             totals_map["USD"].margin += margin_level.margin * multiplier;
             totals_map["USD"].margin_free += margin_level.margin_free * multiplier;
 
-            table_builder.AddRow({
-                utils::TruncateDouble(account.login, 0),
-                account.name,
-                utils::TruncateDouble(margin_level.leverage, 0),
-                utils::TruncateDouble(margin_level.balance * multiplier, 2),
-                utils::TruncateDouble(margin_level.credit * multiplier, 2),
-                utils::TruncateDouble(floating_pl * multiplier, 2),
-                utils::TruncateDouble(margin_level.equity * multiplier, 2),
-                utils::TruncateDouble(margin_level.margin * multiplier, 2),
-                utils::TruncateDouble(margin_level.margin_free * multiplier, 2),
-                utils::TruncateDouble(margin_level.margin_level, 2),
-                "USD"
-            });
+            table_builder.AddRow({utils::TruncateDouble(account.login, 0),
+                                  account.name,
+                                  utils::TruncateDouble(margin_level.leverage, 0),
+                                  utils::TruncateDouble(margin_level.balance * multiplier, 2),
+                                  utils::TruncateDouble(margin_level.credit * multiplier, 2),
+                                  utils::TruncateDouble(floating_pl * multiplier, 2),
+                                  utils::TruncateDouble(margin_level.equity * multiplier, 2),
+                                  utils::TruncateDouble(margin_level.margin * multiplier, 2),
+                                  utils::TruncateDouble(margin_level.margin_free * multiplier, 2),
+                                  utils::TruncateDouble(margin_level.margin_level, 2),
+                                  "USD"});
         }
     }
 
@@ -128,12 +135,9 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.SetTotalData(totals_array);
 
     const JSONObject table_props = table_builder.CreateTableProps();
-    const Node table_node = Table({}, table_props);
+    const Node       table_node  = Table({}, table_props);
 
-    const Node report = Column({
-        h1({ text("Margin Call Report") }),
-        table_node
-    });
+    const Node report = Column({h1({text("Margin Call Report")}), table_node});
 
     utils::CreateUI(report, response, allocator);
 }
