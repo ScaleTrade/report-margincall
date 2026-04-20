@@ -5,7 +5,7 @@ using namespace ast;
 extern "C" void AboutReport(rapidjson::Value&                   request,
                             rapidjson::Value&                   response,
                             rapidjson::Document::AllocatorType& allocator,
-                            CServerInterface*                   server) {
+                            ReportServerInterface*              server) {
     response.AddMember("version", 1, allocator);
     response.AddMember("name", Value().SetString("Margin Call report", allocator), allocator);
     response.AddMember(
@@ -15,7 +15,8 @@ extern "C" void AboutReport(rapidjson::Value&                   request,
             "Includes financial details such as balance, equity, margin, and full account details.",
             allocator),
         allocator);
-    response.AddMember("type", REPORT_GROUP_TYPE, allocator);
+    response.AddMember("type", static_cast<int>(ReportType::Group), allocator);
+    response.AddMember("key", Value().SetString("MARGIN_CALL_REPORT", allocator), allocator);
 }
 
 extern "C" void DestroyReport() {}
@@ -23,19 +24,19 @@ extern "C" void DestroyReport() {}
 extern "C" void CreateReport(rapidjson::Value&                   request,
                              rapidjson::Value&                   response,
                              rapidjson::Document::AllocatorType& allocator,
-                             CServerInterface*                   server) {
+                             ReportServerInterface*              server) {
     std::string group_mask;
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
 
-    std::unordered_map<std::string, Total> totals_map;
-    std::vector<AccountRecord>             accounts_vector;
-    std::vector<GroupRecord>               groups_vector;
-    std::unordered_map<int, MarginLevel>   margins_map;
+    std::unordered_map<std::string, Total>     totals_map;
+    std::vector<ReportAccountRecord>           accounts_vector;
+    std::vector<ReportGroupRecord>             groups_vector;
+    std::unordered_map<int, ReportMarginLevel> margins_map;
 
     try {
-        std::vector<MarginLevel> margins_tmp_vector;
+        std::vector<ReportMarginLevel> margins_tmp_vector;
 
         server->GetAccountsByGroup(group_mask, &accounts_vector);
         server->GetAllGroups(&groups_vector);
@@ -80,9 +81,9 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     table_builder.AddColumn({"currency", "CURRENCY", 11, search_filter});
 
     for (const auto& account : accounts_vector) {
-        std::vector<TradeRecord> trades_vector;
-        double                   floating_pl  = 0.0;
-        MarginLevel              margin_level = margins_map[account.login];
+        std::vector<ReportTradeRecord> trades_vector;
+        double                         floating_pl  = 0.0;
+        ReportMarginLevel              margin_level = margins_map[account.login];
 
         if (margin_level.level_type == MARGINLEVEL_MARGINCALL ||
             margin_level.level_type == MARGINLEVEL_STOPOUT) {
@@ -92,7 +93,8 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
 
             if (currency != "USD") {
                 try {
-                    server->CalculateConvertRateByCurrency(currency, "USD", OP_SELL, &multiplier);
+                    server->CalculateConvertRateByCurrency(
+                        currency, "USD", static_cast<int>(ReportTradeCommand::Sell), &multiplier);
                 } catch (const std::exception& e) {
                     std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
                 }

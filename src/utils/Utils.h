@@ -6,8 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "Structures.h"
+#include "ReportServerInterface.h"
 #include "ast/Ast.hpp"
+
+using namespace ast;
 
 namespace utils {
     void CreateUI(const ast::Node&                    node,
@@ -19,6 +21,6 @@ namespace utils {
 
     double TruncateDouble(const double& value, const int& digits);
 
-    std::string GetGroupCurrencyByName(const std::vector<GroupRecord>& group_vector,
-                                       const std::string&              group_name);
+    std::string GetGroupCurrencyByName(const std::vector<ReportGroupRecord>& group_vector,
+                                       const std::string&                    group_name);
 } // namespace utils

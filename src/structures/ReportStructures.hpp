@@ -10,3 +10,5 @@ struct Total {
     double margin      = 0.0;
     double margin_free = 0.0;
 };
+
+enum { MARGINLEVEL_OK = 0, MARGINLEVEL_MARGINCALL, MARGINLEVEL_STOPOUT };
