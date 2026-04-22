@@ -26,6 +26,7 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                              rapidjson::Document::AllocatorType& allocator,
                              ReportServerInterface*              server) {
     std::string group_mask;
+
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
@@ -91,23 +92,25 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
             double      multiplier = 1;
             std::string currency   = utils::GetGroupCurrencyByName(groups_vector, account.group);
 
-            if (currency != "USD") {
-                try {
-                    server->CalculateConvertRateByCurrency(
-                        currency, "USD", static_cast<int>(ReportTradeCommand::Sell), &multiplier);
-                } catch (const std::exception& e) {
-                    std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
-                }
-            }
+            // Conversion disabled
+            // if (currency != "USD") {
+            //     try {
+            //         server->CalculateConvertRateByCurrency(
+            //             currency, "USD", static_cast<int>(ReportTradeCommand::Sell),
+            //             &multiplier);
+            //     } catch (const std::exception& e) {
+            //         std::cerr << "[MarginCallReportInterface]: " << e.what() << std::endl;
+            //     }
+            // }
 
             floating_pl = margin_level.equity - margin_level.balance;
 
-            totals_map["USD"].balance += margin_level.balance * multiplier;
-            totals_map["USD"].credit += margin_level.credit * multiplier;
-            totals_map["USD"].floating_pl += floating_pl * multiplier;
-            totals_map["USD"].equity += margin_level.equity * multiplier;
-            totals_map["USD"].margin += margin_level.margin * multiplier;
-            totals_map["USD"].margin_free += margin_level.margin_free * multiplier;
+            totals_map[currency].balance += margin_level.balance * multiplier;
+            totals_map[currency].credit += margin_level.credit * multiplier;
+            totals_map[currency].floating_pl += floating_pl * multiplier;
+            totals_map[currency].equity += margin_level.equity * multiplier;
+            totals_map[currency].margin += margin_level.margin * multiplier;
+            totals_map[currency].margin_free += margin_level.margin_free * multiplier;
 
             table_builder.AddRow({utils::TruncateDouble(account.login, 0),
                                   account.name,
@@ -119,20 +122,22 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                                   utils::TruncateDouble(margin_level.margin * multiplier, 2),
                                   utils::TruncateDouble(margin_level.margin_free * multiplier, 2),
                                   utils::TruncateDouble(margin_level.margin_level, 2),
-                                  "USD"});
+                                  currency});
         }
     }
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{
-        {"balance", utils::TruncateDouble(totals_map["USD"].balance, 2)},
-        {"credit", utils::TruncateDouble(totals_map["USD"].credit, 2)},
-        {"equity", utils::TruncateDouble(totals_map["USD"].equity, 2)},
-        {"floating_pl", utils::TruncateDouble(totals_map["USD"].floating_pl, 2)},
-        {"margin", utils::TruncateDouble(totals_map["USD"].margin, 2)},
-        {"margin_free", utils::TruncateDouble(totals_map["USD"].margin_free, 2)},
-    });
+    for (const auto& [currency, total] : totals_map) {
+        totals_array.emplace_back(
+            JSONObject{{"balance", utils::TruncateDouble(total.balance, 2)},
+                       {"credit", utils::TruncateDouble(total.credit, 2)},
+                       {"equity", utils::TruncateDouble(total.equity, 2)},
+                       {"floating_pl", utils::TruncateDouble(total.floating_pl, 2)},
+                       {"margin", utils::TruncateDouble(total.margin, 2)},
+                       {"margin_free", utils::TruncateDouble(total.margin_free, 2)},
+                       {"currency", currency}});
+    }
 
     table_builder.SetTotalData(totals_array);
 
