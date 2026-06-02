@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "ReportServerInterface.h"
 #include "ast/Ast.hpp"
@@ -23,4 +24,8 @@ namespace utils {
 
     std::string GetGroupCurrencyByName(const std::vector<ReportGroupRecord>& group_vector,
                                        const std::string&                    group_name);
+
+    std::string Trim(const std::string& str);
+
+    std::set<std::string> SplitToSet(const std::string& str);
 } // namespace utils
