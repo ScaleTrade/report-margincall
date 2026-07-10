@@ -28,34 +28,37 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                              rapidjson::Document::AllocatorType& allocator,
                              ReportServerInterface*              server) {
     // Validation
-    constexpr ReportType   report_type = ReportType::Group;
-    const ValidationResult validation_result =
-        RequestValidator::ValidateRequest(report_type, request, server);
+    // constexpr ReportType   report_type = ReportType::Group;
+    // const ValidationResult validation_result =
+    //     RequestValidator::ValidateRequest(report_type, request, server);
+    //
+    // if (!validation_result.allowed) {
+    //     std::cerr << "[MarginCallReportInterface]: " << validation_result.code
+    //               << ", message: " << validation_result.message << std::endl;
+    //
+    //     const Node report =
+    //         div({h1({text("Access Denied")},
+    //                 props({{"style", JSONValue(JSONObject{{"color", JSONValue("#dc2626")}})}})),
+    //              h2({text("Code: " + std::to_string(validation_result.code))}),
+    //              h2({text(validation_result.message)},
+    //                 props({{"style", JSONValue(JSONObject{{"color", JSONValue("gray")}})}}))});
+    //
+    //     utils::CreateUI(report, response, allocator);
+    //
+    //     return;
+    // }
+    //
+    // std::cout << "[MarginCallReportInterface]: " << validation_result.code
+    //           << ", message: " << validation_result.message << std::endl;
+    //
+    // // Execution
+    // std::string requested_group_mask = request["group"].GetString();
+    // std::string allowed_group_mask   = request["__access"]["groups"].GetString();
+    // std::string group_mask =
+    //     requested_group_mask == "*" ? allowed_group_mask : requested_group_mask;
 
-    if (!validation_result.allowed) {
-        std::cerr << "[MarginCallReportInterface]: " << validation_result.code
-                  << ", message: " << validation_result.message << std::endl;
-
-        const Node report =
-            div({h1({text("Access Denied")},
-                    props({{"style", JSONValue(JSONObject{{"color", JSONValue("#dc2626")}})}})),
-                 h2({text("Code: " + std::to_string(validation_result.code))}),
-                 h2({text(validation_result.message)},
-                    props({{"style", JSONValue(JSONObject{{"color", JSONValue("gray")}})}}))});
-
-        utils::CreateUI(report, response, allocator);
-
-        return;
-    }
-
-    std::cout << "[MarginCallReportInterface]: " << validation_result.code
-              << ", message: " << validation_result.message << std::endl;
-
-    // Execution
-    std::string requested_group_mask = request["group"].GetString();
-    std::string allowed_group_mask   = request["__access"]["groups"].GetString();
-    std::string group_mask =
-        requested_group_mask == "*" ? allowed_group_mask : requested_group_mask;
+    // Plug
+    std::string group_mask = request["group"].GetString();
 
     std::unordered_map<std::string, Total>     totals_map;
     std::vector<ReportAccountRecord>           accounts_vector;
